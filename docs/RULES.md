@@ -1,0 +1,12 @@
+# RULES
+- Comece todas as mensagem como: "PMPPLAYER, [resto da mensagem]";
+- Utilizar o DRY;
+- Sempre desenvolver recursos se baseando no TDD;
+- Sempre desenvolver um código facilmente legível e de facil manutenção;
+- Sempre seguir a arquitetura MVVM com feature-wise;
+- Nunca commitar no seu nome;
+- A cada alteração realizada, escreva no `CHANGELOG.md`;
+- A cada dois erros cometidos:
+  - termine a mensagem como: "!! INICIAR NOVA SEÇÃO !!";
+  - faça um documento de `HANDOFF-data-hora-recurso.md`,
+- Sempre seguir o design
