@@ -45,7 +45,7 @@ class AppShell extends StatelessWidget {
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.bg,
+        backgroundColor: context.colors.bg,
         body: Stack(
           children: [
             Positioned.fill(
@@ -141,8 +141,8 @@ class _BottomNav extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: Container(
           decoration: BoxDecoration(
-            color: AppColors.alpha(AppColors.bg, 0.88),
-            border: Border(top: BorderSide(color: AppColors.divider)),
+            color: context.colors.alpha(context.colors.bg, 0.88),
+            border: Border(top: BorderSide(color: context.colors.divider)),
           ),
           padding: const EdgeInsets.only(top: 8, left: 12, right: 12),
           child: SafeArea(
@@ -191,7 +191,7 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = active ? AppColors.accent2_700 : AppColors.neutral600;
+    final color = active ? context.colors.accent2_700 : context.colors.neutral600;
     return Expanded(
       child: InkResponse(
         onTap: onTap,

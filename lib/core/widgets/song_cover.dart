@@ -11,10 +11,10 @@ class SongCover extends StatelessWidget {
   const SongCover({
     super.key,
     required this.song,
-    required this.size,
-    required this.radius,
-    required this.glyphSize,
-    this.glyphColor = AppColors.accent2_700,
+    this.size = 56,
+    this.radius = 8,
+    this.glyphSize = 24,
+    this.glyphColor,
     this.shadow,
   });
 
@@ -22,7 +22,7 @@ class SongCover extends StatelessWidget {
   final double size;
   final double radius;
   final double glyphSize;
-  final Color glyphColor;
+  final Color? glyphColor;
   final List<BoxShadow>? shadow;
 
   @override
@@ -34,7 +34,10 @@ class SongCover extends StatelessWidget {
       radius: radius,
       shadow: shadow,
       child: song.isGeneric
-          ? MusicGlyph(size: glyphSize, color: glyphColor)
+          ? MusicGlyph(
+              size: glyphSize, 
+              color: glyphColor ?? AppColors.light.accent2_700,
+            )
           : null,
     );
   }

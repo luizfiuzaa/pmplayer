@@ -42,7 +42,7 @@ class CoverArtwork extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: borderRadius,
         boxShadow: shadow,
-        color: hasImage || !generic ? null : AppColors.accent2_200,
+        color: hasImage || !generic ? null : context.colors.accent2_200,
         gradient: hasImage || generic
             ? null
             : LinearGradient(

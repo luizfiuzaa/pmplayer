@@ -32,15 +32,15 @@ class FavoritesView extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(22),
                 boxShadow: AppShadows.md,
-                gradient: const LinearGradient(
+                gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [AppColors.accent400, AppColors.accent700],
+                  colors: [context.colors.accent400, context.colors.accent700],
                 ),
               ),
-              child: const Icon(Icons.favorite, size: 34, color: Colors.white),
+              child: Icon(Icons.favorite, size: 34, color: Colors.white),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: 16),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -50,19 +50,19 @@ class FavoritesView extends StatelessWidget {
                   '${favorites.length} músicas curtidas',
                   style: AppTypography.bodyStyle(
                     size: 13,
-                    color: AppColors.neutral600,
+                    color: context.colors.neutral600,
                   ),
                 ),
               ],
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         Align(
           alignment: Alignment.centerLeft,
           child: _PlayPill(onTap: () => player.playFavorites()),
         ),
-        const SizedBox(height: 22),
+        SizedBox(height: 22),
         if (favorites.isEmpty)
           const _EmptyFavorites()
         else
@@ -87,7 +87,7 @@ class _PlayPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.accent2_500,
+      color: context.colors.accent2_500,
       borderRadius: BorderRadius.circular(999),
       child: InkWell(
         onTap: onTap,
@@ -97,13 +97,13 @@ class _PlayPill extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.play_arrow, size: 18, color: AppColors.bg),
-              const SizedBox(width: 8),
+              Icon(Icons.play_arrow, size: 18, color: context.colors.bg),
+              SizedBox(width: 8),
               Text(
                 'Tocar',
                 style: AppTypography.headingStyle(
                   size: 15,
-                  color: AppColors.bg,
+                  color: context.colors.bg,
                 ),
               ),
             ],
@@ -127,11 +127,11 @@ class _EmptyFavorites extends StatelessWidget {
             'Nada por aqui ainda',
             style: AppTypography.headingStyle(size: 19),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           Text(
             'Toque no coração de uma música para guardá-la.',
             textAlign: TextAlign.center,
-            style: AppTypography.bodyStyle(color: AppColors.neutral600),
+            style: AppTypography.bodyStyle(color: context.colors.neutral600),
           ),
         ],
       ),

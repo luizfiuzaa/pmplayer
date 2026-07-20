@@ -10,6 +10,8 @@ import 'core/playback/audio_engine.dart';
 import 'core/playback/just_audio_engine.dart';
 import 'core/state/library_store.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/app_colors.dart';
+import 'core/state/settings_store.dart';
 import 'features/library/import/music_importer.dart';
 import 'features/navigation/navigation_controller.dart';
 import 'features/player/player_view_model.dart';
@@ -57,6 +59,9 @@ class PmPlayerApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
+          create: (_) => SettingsStore(prefs),
+        ),
+        ChangeNotifierProvider(
           create: (_) => LibraryStore(initial: initial, repository: repository),
         ),
         ChangeNotifierProvider(create: (_) => NavigationController()),
@@ -81,11 +86,17 @@ class PmPlayerApp extends StatelessWidget {
           create: (_) => coverPicker ?? FileSelectorCoverImagePicker(),
         ),
       ],
-      child: MaterialApp(
-        title: 'PMPlayer',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.build(),
-        home: const AppShell(),
+      child: Consumer<SettingsStore>(
+        builder: (context, settings, _) {
+          return MaterialApp(
+            title: 'PMPlayer',
+            debugShowCheckedModeBanner: false,
+            themeMode: settings.themeMode,
+            theme: AppTheme.build(AppColors.light, Brightness.light),
+            darkTheme: AppTheme.build(AppColors.dark, Brightness.dark),
+            home: const AppShell(),
+          );
+        },
       ),
     );
   }

@@ -8,6 +8,7 @@ import '../../core/theme/app_shadows.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/widgets/cover_artwork.dart';
 import '../../core/widgets/music_glyph.dart';
+import '../../core/widgets/scale_on_press.dart';
 import '../navigation/navigation_controller.dart';
 import 'player_view_model.dart';
 import '../../core/utils/ui_utils.dart';
@@ -22,17 +23,18 @@ class NowPlayingView extends StatelessWidget {
     final library = context.watch<LibraryStore>();
     final navigation = context.read<NavigationController>();
     final song = player.currentSong;
-    if (song == null) return const SizedBox.shrink();
+    if (song == null) return SizedBox.shrink();
 
-    final npFirst = song.palette?.first ?? AppColors.accent2_300;
-    final topColor = Color.lerp(AppColors.bg, npFirst, 0.4)!;
+    final npFirst = song.palette?.first ?? context.colors.accent2_300;
+    final topColor = Color.lerp(context.colors.bg, npFirst, 0.4)!;
 
-    return DecoratedBox(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 600),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [topColor, AppColors.bg],
+          colors: [topColor, context.colors.bg],
           stops: const [0.0, 0.6],
         ),
       ),
@@ -45,26 +47,38 @@ class NowPlayingView extends StatelessWidget {
                 contextLabel: player.contextLabel,
                 onMinimize: navigation.minimize,
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               Expanded(
-                child: Center(
-                  child: _Artwork(song: song, spinning: player.isPlaying),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 400),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  child: Center(
+                    key: ValueKey(song.id),
+                    child: _Artwork(song: song, spinning: player.isPlaying),
+                  ),
                 ),
               ),
-              const SizedBox(height: 26),
-              _TitleRow(
-                song: song,
-                isFavorite: library.isFavorite(song.id),
-                onToggleFavorite: () => UiUtils.toggleFavorite(context, song.id),
+              SizedBox(height: 26),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 400),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                child: _TitleRow(
+                  key: ValueKey(song.id),
+                  song: song,
+                  isFavorite: library.isFavorite(song.id),
+                  onToggleFavorite: () => UiUtils.toggleFavorite(context, song.id),
+                ),
               ),
-              const SizedBox(height: 22),
+              SizedBox(height: 22),
               _ProgressBar(
                 fraction: player.progressFraction,
                 currentLabel: Song.formatSeconds(player.progressSeconds),
                 durationLabel: song.durationLabel,
                 onSeek: player.seekToFraction,
               ),
-              const SizedBox(height: 14),
+              SizedBox(height: 14),
               _Controls(player: player),
             ],
           ),
@@ -84,15 +98,14 @@ class _TopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        InkResponse(
+        ScaleOnPress(
           onTap: onMinimize,
-          radius: 24,
-          child: const Padding(
+          child: Padding(
             padding: EdgeInsets.all(6),
             child: Icon(
               Icons.keyboard_arrow_down,
               size: 26,
-              color: AppColors.text,
+              color: context.colors.text,
             ),
           ),
         ),
@@ -105,13 +118,13 @@ class _TopBar extends StatelessWidget {
               weight: FontWeight.w700,
               height: 1.2,
               letterSpacing: 1.54,
-              color: AppColors.accent2_800,
+              color: context.colors.accent2_800,
             ),
           ),
         ),
-        const Padding(
+        Padding(
           padding: EdgeInsets.all(6),
-          child: Icon(Icons.more_horiz, size: 24, color: AppColors.text),
+          child: Icon(Icons.more_horiz, size: 24, color: context.colors.text),
         ),
       ],
     );
@@ -190,11 +203,11 @@ class _SpinningDiscState extends State<_SpinningDisc>
         alignment: Alignment.center,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppColors.alpha(AppColors.accent2_500, 0.3),
+          color: context.colors.alpha(context.colors.accent2_500, 0.3),
         ),
-        child: const MusicGlyph(
+        child: MusicGlyph(
           size: 56,
-          color: AppColors.accent2_800,
+          color: context.colors.accent2_800,
           strokeWidth: 2.5,
         ),
       ),
@@ -204,6 +217,7 @@ class _SpinningDiscState extends State<_SpinningDisc>
 
 class _TitleRow extends StatelessWidget {
   const _TitleRow({
+    super.key,
     required this.song,
     required this.isFavorite,
     required this.onToggleFavorite,
@@ -229,19 +243,19 @@ class _TitleRow extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: AppTypography.headingStyle(size: 29, height: 1.08),
               ),
-              const SizedBox(height: 2),
+              SizedBox(height: 2),
               Text(
                 song.artist,
                 style: AppTypography.bodyStyle(
                   size: 15,
                   weight: FontWeight.w600,
-                  color: AppColors.accent2_800,
+                  color: context.colors.accent2_800,
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: 12),
         InkResponse(
           onTap: onToggleFavorite,
           radius: 28,
@@ -250,7 +264,7 @@ class _TitleRow extends StatelessWidget {
             child: Icon(
               isFavorite ? Icons.favorite : Icons.favorite_border,
               size: 28,
-              color: isFavorite ? AppColors.accent : AppColors.neutral500,
+              color: isFavorite ? context.colors.accent : context.colors.neutral500,
             ),
           ),
         ),
@@ -293,7 +307,7 @@ class _ProgressBar extends StatelessWidget {
                       Container(
                         height: 6,
                         decoration: BoxDecoration(
-                          color: AppColors.alpha(AppColors.text, 0.15),
+                          color: context.colors.alpha(context.colors.text, 0.15),
                           borderRadius: BorderRadius.circular(999),
                         ),
                       ),
@@ -302,7 +316,7 @@ class _ProgressBar extends StatelessWidget {
                         child: Container(
                           height: 6,
                           decoration: BoxDecoration(
-                            color: AppColors.accent2_700,
+                            color: context.colors.accent2_700,
                             borderRadius: BorderRadius.circular(999),
                           ),
                         ),
@@ -314,7 +328,7 @@ class _ProgressBar extends StatelessWidget {
                           width: 14,
                           height: 14,
                           decoration: BoxDecoration(
-                            color: AppColors.accent2_800,
+                            color: context.colors.accent2_800,
                             shape: BoxShape.circle,
                             boxShadow: AppShadows.sm,
                           ),
@@ -327,7 +341,7 @@ class _ProgressBar extends StatelessWidget {
             );
           },
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: 6),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -335,14 +349,14 @@ class _ProgressBar extends StatelessWidget {
               currentLabel,
               style: AppTypography.bodyStyle(
                 size: 11.5,
-                color: AppColors.neutral600,
+                color: context.colors.neutral600,
               ),
             ),
             Text(
               durationLabel,
               style: AppTypography.bodyStyle(
                 size: 11.5,
-                color: AppColors.neutral600,
+                color: context.colors.neutral600,
               ),
             ),
           ],
@@ -362,64 +376,59 @@ class _Controls extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        InkResponse(
+        ScaleOnPress(
           onTap: player.toggleShuffle,
-          radius: 24,
           child: Padding(
             padding: const EdgeInsets.all(8),
             child: Icon(
               Icons.shuffle,
               size: 24,
               color: player.shuffle
-                  ? AppColors.accent2_700
-                  : AppColors.neutral500,
+                  ? context.colors.accent2_700
+                  : context.colors.neutral500,
             ),
           ),
         ),
-        InkResponse(
+        ScaleOnPress(
           onTap: player.prev,
-          radius: 26,
-          child: const Padding(
+          child: Padding(
             padding: EdgeInsets.all(8),
-            child: Icon(Icons.skip_previous, size: 34, color: AppColors.text),
+            child: Icon(Icons.skip_previous, size: 34, color: context.colors.text),
           ),
         ),
-        Material(
-          color: AppColors.accent2_700,
-          shape: const CircleBorder(),
-          child: InkWell(
-            onTap: player.togglePlay,
-            customBorder: const CircleBorder(),
+        ScaleOnPress(
+          onTap: player.togglePlay,
+          child: Material(
+            color: context.colors.accent2_700,
+            shape: CircleBorder(),
             child: SizedBox(
               width: 78,
               height: 78,
               child: Icon(
                 player.isPlaying ? Icons.pause : Icons.play_arrow,
                 size: 34,
-                color: AppColors.bg,
+                color: context.colors.bg,
               ),
             ),
           ),
         ),
-        InkResponse(
+        ScaleOnPress(
           onTap: player.next,
-          radius: 26,
-          child: const Padding(
+          child: Padding(
             padding: EdgeInsets.all(8),
-            child: Icon(Icons.skip_next, size: 34, color: AppColors.text),
+            child: Icon(Icons.skip_next, size: 34, color: context.colors.text),
           ),
         ),
-        InkResponse(
+        ScaleOnPress(
           onTap: player.toggleRepeat,
-          radius: 24,
           child: Padding(
             padding: const EdgeInsets.all(8),
             child: Icon(
               Icons.repeat,
               size: 24,
               color: player.repeat
-                  ? AppColors.accent2_700
-                  : AppColors.neutral500,
+                  ? context.colors.accent2_700
+                  : context.colors.neutral500,
             ),
           ),
         ),

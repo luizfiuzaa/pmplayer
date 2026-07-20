@@ -1,7 +1,8 @@
 import 'dart:io';
 
 import 'package:audio_metadata_reader/audio_metadata_reader.dart';
-import 'package:file_selector/file_selector.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -39,15 +40,26 @@ Song songFromMetadata({
   );
 }
 
-/// Implementação real: `file_selector` para escolher arquivos e
-/// `audio_metadata_reader` para extrair título/artista/duração/capa (ID3 etc.).
+/// Implementação real usando `file_picker`
 class FileSelectorMusicImporter implements MusicImporter {
   @override
   Future<List<Song>> pickAndImport() async {
-    final dirPath = await getDirectoryPath();
+    // Solicita permissões de armazenamento/áudio.
+    if (Platform.isAndroid) {
+      if (await Permission.audio.status.isDenied) {
+        await Permission.audio.request();
+      }
+      if (await Permission.storage.status.isDenied) {
+        await Permission.storage.request();
+      }
+    }
+
+    final dirPath = await FilePicker.getDirectoryPath();
     if (dirPath == null) return const [];
 
     final directory = Directory(dirPath);
+    if (!directory.existsSync()) return const [];
+
     final allFiles = directory.listSync(recursive: true).whereType<File>();
     
     final audioExtensions = ['.mp3', '.m4a', '.aac', '.flac', '.wav', '.ogg', '.opus', '.wma'];

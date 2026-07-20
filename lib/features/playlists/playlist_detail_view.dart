@@ -25,7 +25,7 @@ class PlaylistDetailView extends StatelessWidget {
     final navigation = context.read<NavigationController>();
     final playlist = library.playlistById(navigation.activePlaylistId);
 
-    if (playlist == null) return const SizedBox();
+    if (playlist == null) return SizedBox();
 
     final songs = playlist.songIds.map((id) => library.songById(id)).toList();
 
@@ -33,7 +33,7 @@ class PlaylistDetailView extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(22, 12, 22, 150),
       children: [
         _BackButton(onTap: navigation.backToPlaylists),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
@@ -42,7 +42,7 @@ class PlaylistDetailView extends StatelessWidget {
               coverPath: playlist.coverPath,
               onTap: () => _pickCover(context, playlist.id),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,20 +55,20 @@ class PlaylistDetailView extends StatelessWidget {
                       weight: FontWeight.w700,
                       height: 1.2,
                       letterSpacing: 1.54,
-                      color: AppColors.accent2_700,
+                      color: context.colors.accent2_700,
                     ),
                   ),
-                  const SizedBox(height: 3),
+                  SizedBox(height: 3),
                   Text(
                     playlist.name,
                     style: AppTypography.headingStyle(size: 30, height: 1.05),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   Text(
                     '${playlist.songCount} músicas',
                     style: AppTypography.bodyStyle(
                       size: 13,
-                      color: AppColors.neutral600,
+                      color: context.colors.neutral600,
                     ),
                   ),
                 ],
@@ -76,19 +76,19 @@ class PlaylistDetailView extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 18),
+        SizedBox(height: 18),
         Row(
           children: [
             Expanded(
               child: _PlayButton(onTap: () => player.playPlaylist(playlist)),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             _ShuffleButton(
               onTap: () => player.playPlaylist(playlist, shuffle: true),
             ),
           ],
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: 20),
         for (final song in songs)
           TrackTile(
             song: song,
@@ -153,14 +153,14 @@ class _EditableCover extends StatelessWidget {
               height: 34,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: AppColors.accent2_500,
+                color: context.colors.accent2_500,
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColors.bg, width: 3),
+                border: Border.all(color: context.colors.bg, width: 3),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.photo_camera,
                 size: 16,
-                color: AppColors.bg,
+                color: context.colors.bg,
               ),
             ),
           ),
@@ -180,15 +180,15 @@ class _BackButton extends StatelessWidget {
     return Align(
       alignment: Alignment.centerLeft,
       child: Material(
-        color: AppColors.surface,
-        shape: const CircleBorder(),
+        color: context.colors.surface,
+        shape: CircleBorder(),
         child: InkWell(
           onTap: onTap,
-          customBorder: const CircleBorder(),
-          child: const SizedBox(
+          customBorder: CircleBorder(),
+          child: SizedBox(
             width: 38,
             height: 38,
-            child: Icon(Icons.chevron_left, size: 22, color: AppColors.text),
+            child: Icon(Icons.chevron_left, size: 22, color: context.colors.text),
           ),
         ),
       ),
@@ -204,7 +204,7 @@ class _PlayButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.accent2_500,
+      color: context.colors.accent2_500,
       borderRadius: BorderRadius.circular(999),
       child: InkWell(
         onTap: onTap,
@@ -214,13 +214,13 @@ class _PlayButton extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.play_arrow, size: 18, color: AppColors.bg),
-              const SizedBox(width: 8),
+              Icon(Icons.play_arrow, size: 18, color: context.colors.bg),
+              SizedBox(width: 8),
               Text(
                 'Tocar',
                 style: AppTypography.headingStyle(
                   size: 16,
-                  color: AppColors.bg,
+                  color: context.colors.bg,
                 ),
               ),
             ],
@@ -239,15 +239,15 @@ class _ShuffleButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.surface,
+      color: context.colors.surface,
       borderRadius: BorderRadius.circular(999),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(999),
-        child: const SizedBox(
+        child: SizedBox(
           width: 50,
           height: 50,
-          child: Icon(Icons.shuffle, size: 20, color: AppColors.accent2_800),
+          child: Icon(Icons.shuffle, size: 20, color: context.colors.accent2_800),
         ),
       ),
     );

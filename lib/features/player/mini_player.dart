@@ -25,7 +25,7 @@ class MiniPlayer extends StatelessWidget {
     if (song == null) return const SizedBox.shrink();
 
     return Material(
-      color: AppColors.accent2_800,
+      color: context.colors.accent2_800,
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         onTap: navigation.openNowPlaying,
@@ -44,7 +44,7 @@ class MiniPlayer extends StatelessWidget {
                 size: 44,
                 radius: 12,
                 glyphSize: 18,
-                glyphColor: AppColors.accent2_100,
+                glyphColor: context.colors.accent2_100,
               ),
               const SizedBox(width: 11),
               Expanded(
@@ -60,7 +60,7 @@ class MiniPlayer extends StatelessWidget {
                         size: 14,
                         weight: FontWeight.w700,
                         height: 1.2,
-                        color: AppColors.bg,
+                        color: context.colors.bg,
                       ),
                     ),
                     Text(
@@ -70,7 +70,7 @@ class MiniPlayer extends StatelessWidget {
                       style: AppTypography.bodyStyle(
                         size: 11.5,
                         height: 1.3,
-                        color: AppColors.alpha(AppColors.bg, 0.7),
+                        color: context.colors.alpha(context.colors.bg, 0.7),
                       ),
                     ),
                   ],
@@ -89,7 +89,7 @@ class MiniPlayer extends StatelessWidget {
                   child: Icon(
                     player.isPlaying ? Icons.pause : Icons.play_arrow,
                     size: 24,
-                    color: AppColors.bg,
+                    color: context.colors.bg,
                   ),
                 ),
               ),

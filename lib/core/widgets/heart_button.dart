@@ -26,7 +26,7 @@ class HeartButton extends StatelessWidget {
         child: Icon(
           isFavorite ? Icons.favorite : Icons.favorite_border,
           size: size,
-          color: isFavorite ? AppColors.accent : AppColors.neutral500,
+          color: isFavorite ? context.colors.accent : context.colors.neutral500,
         ),
       ),
     );

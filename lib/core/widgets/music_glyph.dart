@@ -8,19 +8,19 @@ class MusicGlyph extends StatelessWidget {
   const MusicGlyph({
     super.key,
     required this.size,
-    this.color = AppColors.accent2_700,
+    this.color,
     this.strokeWidth = 2.75,
   });
 
   final double size;
-  final Color color;
+  final Color? color;
   final double strokeWidth;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox.square(
       dimension: size,
-      child: CustomPaint(painter: _MusicGlyphPainter(color, strokeWidth)),
+      child: CustomPaint(painter: _MusicGlyphPainter(color ?? AppColors.light.accent2_700, strokeWidth)),
     );
   }
 }

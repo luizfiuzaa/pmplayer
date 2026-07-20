@@ -10,20 +10,20 @@ import 'music_repository.dart';
 /// sem alterar a UI nem os fluxos.
 class SampleMusicRepository implements MusicRepository {
   @override
-  List<Song> songs() => const [
+  List<Song> songs() => [
     Song(
       id: 's1',
       title: 'Maré Cheia',
       artist: 'Luíza Sol',
       durationSeconds: 214,
-      palette: [AppColors.accent2_400, AppColors.accent2_700],
+      palette: [AppColors.light.accent2_400, AppColors.light.accent2_700],
     ),
     Song(
       id: 's2',
       title: 'Terra Vermelha',
       artist: 'Baobá',
       durationSeconds: 187,
-      palette: [AppColors.accent400, AppColors.accent700],
+      palette: [AppColors.light.accent400, AppColors.light.accent700],
     ),
     Song(id: 's3', title: 'Sereno', artist: 'Manu Vale', durationSeconds: 243),
     Song(
@@ -31,14 +31,14 @@ class SampleMusicRepository implements MusicRepository {
       title: 'Cio da Terra',
       artist: 'Flor de Sal',
       durationSeconds: 198,
-      palette: [AppColors.accent2_300, AppColors.accent600],
+      palette: [AppColors.light.accent2_300, AppColors.light.accent600],
     ),
     Song(
       id: 's5',
       title: 'Vento Norte',
       artist: 'Os Aroeira',
       durationSeconds: 221,
-      palette: [AppColors.accent500, AppColors.accent2_800],
+      palette: [AppColors.light.accent500, AppColors.light.accent2_800],
     ),
     Song(
       id: 's6',
@@ -51,14 +51,14 @@ class SampleMusicRepository implements MusicRepository {
       title: 'Raiz',
       artist: 'Coletivo Barro',
       durationSeconds: 259,
-      palette: [AppColors.accent2_500, AppColors.accent2_900],
+      palette: [AppColors.light.accent2_500, AppColors.light.accent2_900],
     ),
     Song(
       id: 's8',
       title: 'Lua de Sertão',
       artist: 'Aline Prado',
       durationSeconds: 205,
-      palette: [AppColors.accent300, AppColors.accent2_700],
+      palette: [AppColors.light.accent300, AppColors.light.accent2_700],
     ),
     Song(id: 's9', title: 'Rio Abaixo', artist: 'Tuim', durationSeconds: 168),
     Song(
@@ -66,12 +66,12 @@ class SampleMusicRepository implements MusicRepository {
       title: 'Amanhecer',
       artist: 'Joana Erê',
       durationSeconds: 232,
-      palette: [AppColors.accent2_400, AppColors.accent800],
+      palette: [AppColors.light.accent2_400, AppColors.light.accent800],
     ),
   ];
 
   @override
-  List<Playlist> playlists() => const [
+  List<Playlist> playlists() => [
     Playlist(
       id: 'p1',
       name: 'Manhã Devagar',
@@ -88,7 +88,7 @@ class SampleMusicRepository implements MusicRepository {
   ];
 
   @override
-  List<String> initialFavoriteIds() => const ['s1', 's4', 's7'];
+  List<String> initialFavoriteIds() => ['s1', 's4', 's7'];
 
   /// Snapshot de exemplo (usado em testes e como demonstração).
   LibrarySnapshot snapshot() => LibrarySnapshot(

@@ -52,7 +52,7 @@ class _CreatePlaylistSheetState extends State<CreatePlaylistSheet>
     return GestureDetector(
       onTap: navigation.closeCreateSheet,
       child: ColoredBox(
-        color: AppColors.alpha(AppColors.neutral900, 0.45),
+        color: context.colors.alpha(context.colors.neutral900, 0.45),
         child: FadeTransition(
           opacity: _controller,
           child: Align(
@@ -88,8 +88,8 @@ class _SheetBody extends StatelessWidget {
 
     return Container(
       constraints: BoxConstraints(maxHeight: maxHeight),
-      decoration: const BoxDecoration(
-        color: AppColors.bg,
+      decoration: BoxDecoration(
+        color: context.colors.bg,
         borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
         boxShadow: [BoxShadow(color: Color(0x38000000), blurRadius: 32)],
       ),
@@ -107,7 +107,7 @@ class _SheetBody extends StatelessWidget {
                   height: 5,
                   margin: const EdgeInsets.only(bottom: 18, top: 2),
                   decoration: BoxDecoration(
-                    color: AppColors.neutral400,
+                    color: context.colors.neutral400,
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
@@ -116,17 +116,17 @@ class _SheetBody extends StatelessWidget {
                 'Nova playlist',
                 style: AppTypography.headingStyle(size: 26),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Text(
                 'Nome da playlist',
                 style: AppTypography.bodyStyle(
                   size: 12,
-                  color: AppColors.alpha(AppColors.text, 0.7),
+                  color: context.colors.alpha(context.colors.text, 0.7),
                 ),
               ),
-              const SizedBox(height: 5),
+              SizedBox(height: 5),
               _NameField(controller: nameController, onChanged: vm.setName),
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
               Text(
                 'ADICIONAR MÚSICAS · ${vm.pickCount} SELECIONADAS',
                 style: AppTypography.bodyStyle(
@@ -134,17 +134,17 @@ class _SheetBody extends StatelessWidget {
                   weight: FontWeight.w700,
                   height: 1.2,
                   letterSpacing: 1.2,
-                  color: AppColors.neutral600,
+                  color: context.colors.neutral600,
                 ),
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: 10),
               for (final song in songs)
                 _PickRow(
                   song: song,
                   picked: vm.isPicked(song.id),
                   onToggle: () => vm.toggle(song.id),
                 ),
-              const SizedBox(height: 22),
+              SizedBox(height: 22),
               _CreateButton(enabled: vm.canCreate, onPressed: vm.submit),
             ],
           ),
@@ -165,28 +165,28 @@ class _NameField extends StatelessWidget {
     return TextField(
       controller: controller,
       onChanged: onChanged,
-      cursorColor: AppColors.accent,
+      cursorColor: context.colors.accent,
       style: AppTypography.bodyStyle(size: 16),
       decoration: InputDecoration(
         isDense: true,
         hintText: 'Ex: Domingo devagar',
         hintStyle: AppTypography.bodyStyle(
           size: 16,
-          color: AppColors.neutral500,
+          color: context.colors.neutral500,
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 12,
         ),
         filled: true,
-        fillColor: AppColors.surface,
+        fillColor: context.colors.surface,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(999),
-          borderSide: BorderSide(color: AppColors.divider),
+          borderSide: BorderSide(color: context.colors.divider),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(999),
-          borderSide: const BorderSide(color: AppColors.accent),
+          borderSide: BorderSide(color: context.colors.accent),
         ),
       ),
     );
@@ -214,7 +214,7 @@ class _PickRow extends StatelessWidget {
         child: Row(
           children: [
             SongCover(song: song, size: 44, radius: 11, glyphSize: 18),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -237,13 +237,13 @@ class _PickRow extends StatelessWidget {
                     style: AppTypography.bodyStyle(
                       size: 12,
                       height: 1.3,
-                      color: AppColors.neutral600,
+                      color: context.colors.neutral600,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             _Checkbox(picked: picked),
           ],
         ),
@@ -265,14 +265,14 @@ class _Checkbox extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: picked ? AppColors.accent2_500 : Colors.transparent,
+        color: picked ? context.colors.accent2_500 : Colors.transparent,
         border: Border.all(
-          color: picked ? AppColors.accent2_500 : AppColors.neutral400,
+          color: picked ? context.colors.accent2_500 : context.colors.neutral400,
           width: 2,
         ),
       ),
       child: picked
-          ? const Icon(Icons.check, size: 15, color: AppColors.bg)
+          ? Icon(Icons.check, size: 15, color: context.colors.bg)
           : null,
     );
   }
@@ -289,7 +289,7 @@ class _CreateButton extends StatelessWidget {
     return Opacity(
       opacity: enabled ? 1 : 0.45,
       child: Material(
-        color: AppColors.accent2_500,
+        color: context.colors.accent2_500,
         borderRadius: BorderRadius.circular(999),
         child: InkWell(
           onTap: enabled ? onPressed : null,
@@ -301,7 +301,7 @@ class _CreateButton extends StatelessWidget {
                 'Criar playlist',
                 style: AppTypography.headingStyle(
                   size: 17,
-                  color: AppColors.bg,
+                  color: context.colors.bg,
                 ),
               ),
             ),

@@ -24,17 +24,17 @@ class PlaylistsView extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(22, 12, 22, 150),
       children: [
         Text('Playlists', style: AppTypography.headingStyle(size: 38)),
-        const SizedBox(height: 4),
+        SizedBox(height: 4),
         Text(
           'Suas coleções, do seu jeito.',
           style: AppTypography.bodyStyle(
             size: 14,
-            color: AppColors.alpha(AppColors.text, 0.55),
+            color: context.colors.alpha(context.colors.text, 0.55),
           ),
         ),
-        const SizedBox(height: 22),
+        SizedBox(height: 22),
         _CreatePlaylistButton(onTap: navigation.openCreateSheet),
-        const SizedBox(height: 22),
+        SizedBox(height: 22),
         _PlaylistGrid(
           playlists: playlists,
           coverPaletteOf: (p) => _coverPalette(library, p),
@@ -70,18 +70,18 @@ class _CreatePlaylistButton extends StatelessWidget {
                 width: 44,
                 height: 44,
                 alignment: Alignment.center,
-                decoration: const BoxDecoration(
-                  color: AppColors.accent2_500,
+                decoration: BoxDecoration(
+                  color: context.colors.accent2_500,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.add, size: 24, color: AppColors.bg),
+                child: Icon(Icons.add, size: 24, color: context.colors.bg),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Text(
                 'Criar playlist',
                 style: AppTypography.headingStyle(
                   size: 19,
-                  color: AppColors.accent2_800,
+                  color: context.colors.accent2_800,
                 ),
               ),
             ],
@@ -101,10 +101,10 @@ class DottedBorderBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      painter: _DashedBorderPainter(),
+      painter: _DashedBorderPainter(context.colors.accent2_400),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: AppColors.accent2_100,
+          color: context.colors.accent2_100,
           borderRadius: BorderRadius.circular(28),
         ),
         child: child,
@@ -114,10 +114,13 @@ class DottedBorderBox extends StatelessWidget {
 }
 
 class _DashedBorderPainter extends CustomPainter {
+  final Color color;
+  _DashedBorderPainter(this.color);
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = AppColors.accent2_400
+      ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
     final rrect = RRect.fromRectAndRadius(
@@ -170,10 +173,10 @@ class _PlaylistGrid extends StatelessWidget {
                   onTap: () => onOpen(left.id),
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16),
               Expanded(
                 child: right == null
-                    ? const SizedBox()
+                    ? SizedBox()
                     : _PlaylistCard(
                         playlist: right,
                         palette: coverPaletteOf(right),
@@ -217,7 +220,7 @@ class _PlaylistCard extends StatelessWidget {
               shadow: AppShadows.md,
             ),
           ),
-          const SizedBox(height: 9),
+          SizedBox(height: 9),
           Text(
             playlist.name,
             style: AppTypography.headingStyle(size: 17, height: 1.15),
@@ -226,7 +229,7 @@ class _PlaylistCard extends StatelessWidget {
             '${playlist.songCount} músicas',
             style: AppTypography.bodyStyle(
               size: 12,
-              color: AppColors.neutral600,
+              color: context.colors.neutral600,
             ),
           ),
         ],

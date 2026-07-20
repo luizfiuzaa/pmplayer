@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 class AppColors extends ThemeExtension<AppColors> {
   final Color bg;
   final Color surface;
@@ -68,10 +66,6 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.accent2_800,
     required this.accent2_900,
   });
-
-  Color get divider => text.withValues(alpha: 0.16);
-  Color alpha(Color color, double pct) => color.withValues(alpha: pct.clamp(0.0, 1.0));
-  Color mix(Color a, Color b, double pctA) => Color.lerp(b, a, pctA.clamp(0.0, 1.0))!;
 
   @override
   AppColors copyWith({
@@ -218,43 +212,4 @@ class AppColors extends ThemeExtension<AppColors> {
     accent2_900: Color(0xFF272E1B),
   );
 
-  static const dark = AppColors(
-    bg: Color(0xFF161413),
-    surface: Color(0xFF221E1C),
-    text: Color(0xFFEAE3DC),
-    accent: Color(0xFFD98A57),
-    accent2: Color(0xFF99A97C),
-    neutral100: Color(0xFF2A2624),
-    neutral200: Color(0xFF35302E),
-    neutral300: Color(0xFF47413D),
-    neutral400: Color(0xFF5C544F),
-    neutral500: Color(0xFF7A706A),
-    neutral600: Color(0xFF968B84),
-    neutral700: Color(0xFFB0A59E),
-    neutral800: Color(0xFFC4BDB7),
-    neutral900: Color(0xFFF0EBE6),
-    accent100: Color(0xFF2E1708),
-    accent200: Color(0xFF45230D),
-    accent300: Color(0xFF663616),
-    accent400: Color(0xFF874921),
-    accent500: Color(0xFFA95D2C),
-    accent600: Color(0xFFC77745),
-    accent700: Color(0xFFD98A57),
-    accent800: Color(0xFFE9B390),
-    accent900: Color(0xFFF6DBCD),
-    accent2_100: Color(0xFF1D2413),
-    accent2_200: Color(0xFF2D381E),
-    accent2_300: Color(0xFF40502A),
-    accent2_400: Color(0xFF566938),
-    accent2_500: Color(0xFF71854D),
-    accent2_600: Color(0xFF8DA266),
-    accent2_700: Color(0xFFA6BB82),
-    accent2_800: Color(0xFFC3D4A4),
-    accent2_900: Color(0xFFE2ECCC),
-  );
-
-}
-
-extension AppColorsExtension on BuildContext {
-  AppColors get colors => Theme.of(this).extension<AppColors>()!;
 }

@@ -63,7 +63,7 @@ class TrackTile extends StatelessWidget {
                       size: 15,
                       weight: FontWeight.w700,
                       height: 1.2,
-                      color: isCurrent ? AppColors.accent2_700 : AppColors.text,
+                      color: isCurrent ? context.colors.accent2_700 : context.colors.text,
                     ),
                   ),
                   Text(
@@ -73,7 +73,7 @@ class TrackTile extends StatelessWidget {
                     style: AppTypography.bodyStyle(
                       size: 12.5,
                       height: 1.3,
-                      color: AppColors.neutral600,
+                      color: context.colors.neutral600,
                     ),
                   ),
                 ],
@@ -92,7 +92,7 @@ class TrackTile extends StatelessWidget {
                   textAlign: TextAlign.right,
                   style: AppTypography.bodyStyle(
                     size: 12,
-                    color: AppColors.neutral500,
+                    color: context.colors.neutral500,
                   ),
                 ),
               ),

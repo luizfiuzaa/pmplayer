@@ -8,6 +8,8 @@ import '../../core/widgets/track_tile.dart';
 import '../player/player_view_model.dart';
 import 'import/music_importer.dart';
 import '../../core/utils/ui_utils.dart';
+import '../../core/widgets/scale_on_press.dart';
+import '../settings/settings_sheet.dart';
 
 /// Tela "Ouvir agora": cabeçalho, busca (decorativa), ação de adicionar faixas,
 /// modo aleatório e a lista de todas as faixas. Fiel ao bloco LIBRARY do design.
@@ -37,45 +39,54 @@ class LibraryView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 2),
-                  Text(
-                    'Ouvir agora',
-                    style: AppTypography.headingStyle(size: 38),
+                  SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Text(
+                        'Ouvir agora',
+                        style: AppTypography.headingStyle(size: 38),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: Icon(Icons.settings_outlined, color: context.colors.neutral600),
+                        onPressed: () => SettingsSheet.show(context),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-            Material(
-              color: AppColors.accent2_500,
-              shape: const CircleBorder(),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                onTap: songs.isEmpty
-                    ? null
-                    : () {
-                        if (player.shuffle) player.toggleShuffle();
-                        player.play(
-                          songs.first.id,
-                          label: 'Tocando da biblioteca',
-                        );
-                      },
+            ScaleOnPress(
+              onTap: songs.isEmpty
+                  ? null
+                  : () {
+                      if (player.shuffle) player.toggleShuffle();
+                      player.play(
+                        songs.first.id,
+                        label: 'Tocando da biblioteca',
+                      );
+                    },
+              child: Material(
+                color: context.colors.accent2_500,
+                shape: CircleBorder(),
+                clipBehavior: Clip.antiAlias,
                 child: Container(
                   width: 46,
                   height: 46,
                   alignment: Alignment.center,
-                  child: const Icon(
+                  child: Icon(
                     Icons.play_arrow_rounded,
                     size: 28,
-                    color: AppColors.bg,
+                    color: context.colors.bg,
                   ),
                 ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: 20),
         const _SearchField(),
-        const SizedBox(height: 22),
+        SizedBox(height: 22),
         if (songs.isEmpty)
           _EmptyLibrary(onAdd: () => _import(context))
         else ...[
@@ -83,7 +94,7 @@ class LibraryView extends StatelessWidget {
             count: songs.length,
             onTap: () => player.shuffleAll(),
           ),
-          const SizedBox(height: 26),
+          SizedBox(height: 26),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -91,19 +102,19 @@ class LibraryView extends StatelessWidget {
                 'Todas as faixas',
                 style: AppTypography.headingStyle(size: 22),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text(
                 '${songs.length}',
                 style: AppTypography.bodyStyle(
                   size: 12,
-                  color: AppColors.neutral600,
+                  color: context.colors.neutral600,
                 ),
               ),
               const Spacer(),
               _AddButton(onTap: () => _import(context)),
             ],
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           for (final song in songs)
             TrackTile(
               song: song,
@@ -129,19 +140,19 @@ class _SearchField extends StatelessWidget {
       height: 46,
       padding: const EdgeInsets.only(left: 16, right: 14),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.colors.divider),
       ),
       child: Row(
         children: [
-          const Icon(Icons.search, size: 18, color: AppColors.neutral600),
-          const SizedBox(width: 10),
+          Icon(Icons.search, size: 18, color: context.colors.neutral600),
+          SizedBox(width: 10),
           Text(
             'Buscar músicas e artistas',
             style: AppTypography.bodyStyle(
               size: 14,
-              color: AppColors.neutral600,
+              color: context.colors.neutral600,
             ),
           ),
         ],
@@ -158,25 +169,24 @@ class _AddButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.accent2_100,
-      borderRadius: BorderRadius.circular(999),
-      child: InkWell(
-        onTap: onTap,
+    return ScaleOnPress(
+      onTap: onTap,
+      child: Material(
+        color: context.colors.accent2_100,
         borderRadius: BorderRadius.circular(999),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.add, size: 18, color: AppColors.accent2_800),
-              const SizedBox(width: 6),
+              Icon(Icons.add, size: 18, color: context.colors.accent2_800),
+              SizedBox(width: 6),
               Text(
                 'Adicionar',
                 style: AppTypography.bodyStyle(
                   size: 13,
                   weight: FontWeight.w700,
-                  color: AppColors.accent2_800,
+                  color: context.colors.accent2_800,
                 ),
               ),
             ],
@@ -195,11 +205,10 @@ class _ShuffleAllButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.accent2_500,
-      borderRadius: BorderRadius.circular(28),
-      child: InkWell(
-        onTap: onTap,
+    return ScaleOnPress(
+      onTap: onTap,
+      child: Material(
+        color: context.colors.accent2_500,
         borderRadius: BorderRadius.circular(28),
         child: Padding(
           padding: const EdgeInsets.all(14),
@@ -210,12 +219,12 @@ class _ShuffleAllButton extends StatelessWidget {
                 height: 48,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: AppColors.alpha(Colors.white, 0.22),
+                  color: context.colors.alpha(Colors.white, 0.22),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.shuffle, size: 22, color: AppColors.bg),
+                child: Icon(Icons.shuffle, size: 22, color: context.colors.bg),
               ),
-              const SizedBox(width: 14),
+              SizedBox(width: 14),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -224,7 +233,7 @@ class _ShuffleAllButton extends StatelessWidget {
                     'Modo aleatório',
                     style: AppTypography.headingStyle(
                       size: 19,
-                      color: AppColors.bg,
+                      color: context.colors.bg,
                     ),
                   ),
                   Text(
@@ -232,7 +241,7 @@ class _ShuffleAllButton extends StatelessWidget {
                     style: AppTypography.bodyStyle(
                       size: 12.5,
                       height: 1.3,
-                      color: AppColors.alpha(AppColors.bg, 0.85),
+                      color: context.colors.alpha(context.colors.bg, 0.85),
                     ),
                   ),
                 ],
@@ -262,32 +271,31 @@ class _EmptyLibrary extends StatelessWidget {
             height: 76,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: AppColors.accent2_100,
+              color: context.colors.accent2_100,
               borderRadius: BorderRadius.circular(22),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.library_music_outlined,
               size: 34,
-              color: AppColors.accent2_700,
+              color: context.colors.accent2_700,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Text(
             'Sua biblioteca está vazia',
             style: AppTypography.headingStyle(size: 22),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           Text(
             'Adicione arquivos de áudio do seu aparelho para começar a ouvir.',
             textAlign: TextAlign.center,
-            style: AppTypography.bodyStyle(color: AppColors.neutral600),
+            style: AppTypography.bodyStyle(color: context.colors.neutral600),
           ),
-          const SizedBox(height: 20),
-          Material(
-            color: AppColors.accent2_500,
-            borderRadius: BorderRadius.circular(999),
-            child: InkWell(
-              onTap: onAdd,
+          SizedBox(height: 20),
+          ScaleOnPress(
+            onTap: onAdd,
+            child: Material(
+              color: context.colors.accent2_500,
               borderRadius: BorderRadius.circular(999),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -297,13 +305,13 @@ class _EmptyLibrary extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.add, size: 20, color: AppColors.bg),
-                    const SizedBox(width: 8),
+                    Icon(Icons.add, size: 20, color: context.colors.bg),
+                    SizedBox(width: 8),
                     Text(
                       'Adicionar músicas',
                       style: AppTypography.headingStyle(
                         size: 16,
-                        color: AppColors.bg,
+                        color: context.colors.bg,
                       ),
                     ),
                   ],
