@@ -1,5 +1,5 @@
-name: flutter_application_1
-description: "A new Flutter project."
+name: pmplayer
+description: "PMPlayer — reprodutor de áudio offline com arquivos locais."
 publish_to: 'none'
 version: 0.1.0+1
 
@@ -7,13 +7,51 @@ environment:
   sdk: ^3.12.0
 
 dependencies:
+  audio_metadata_reader: ^1.6.0
+  drift: ^2.34.2
+  drift_flutter: ^0.3.1
+  file_selector: ^1.1.0
   flutter:
     sdk: flutter
-
+  just_audio: ^0.10.6
+  path: ^1.9.1
+  path_provider: ^2.1.6
+  provider: ^6.1.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  drift_dev: ^2.34.4
+  build_runner: ^2.15.1
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
+
+  fonts:
+    - family: Caprasimo
+      fonts:
+        - asset: assets/fonts/Caprasimo-Regular.ttf
+          weight: 400
+    - family: Figtree
+      fonts:
+        - asset: assets/fonts/Figtree-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Figtree-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Figtree-Bold.ttf
+          weight: 700
+
+flutter_launcher_icons:
+  android: "ic_launcher"
+  ios: true
+  image_path: "pmplayer-icon.png"
+  web:
+    generate: true
+    image_path: "pmplayer-icon.png"
+  macos:
+    generate: true
+    image_path: "pmplayer-icon.png"
+  windows:
+    generate: true
+    image_path: "pmplayer-icon.png"

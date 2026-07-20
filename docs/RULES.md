@@ -1,5 +1,5 @@
 # RULES
-- Comece todas as mensagem como: "PMPPLAYER, [resto da mensagem]";
+- Comece todas as mensagem como: "PMPLAYER, [resto da mensagem]";
 - Utilizar o DRY;
 - Sempre desenvolver recursos se baseando no TDD;
 - Sempre desenvolver um código facilmente legível e de facil manutenção;
