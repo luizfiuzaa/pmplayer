@@ -42,12 +42,6 @@ Song songFromMetadata({
 /// Implementação real: `file_selector` para escolher arquivos e
 /// `audio_metadata_reader` para extrair título/artista/duração/capa (ID3 etc.).
 class FileSelectorMusicImporter implements MusicImporter {
-  static const _audioGroup = XTypeGroup(
-    label: 'Áudio',
-    extensions: ['mp3', 'm4a', 'aac', 'flac', 'wav', 'ogg', 'opus', 'wma'],
-    mimeTypes: ['audio/*'],
-  );
-
   @override
   Future<List<Song>> pickAndImport() async {
     final dirPath = await getDirectoryPath();
