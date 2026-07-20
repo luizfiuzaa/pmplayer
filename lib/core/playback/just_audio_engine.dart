@@ -1,5 +1,7 @@
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 
+import '../models/song.dart';
 import 'audio_engine.dart';
 
 /// Implementação real do [AudioEngine] usando o pacote `just_audio` para tocar
@@ -8,8 +10,20 @@ class JustAudioEngine implements AudioEngine {
   final AudioPlayer _player = AudioPlayer();
 
   @override
-  Future<Duration?> load(String uri) =>
-      _player.setAudioSource(AudioSource.file(uri));
+  Future<Duration?> load(Song song) {
+    if (song.uri == null) return Future.value(null);
+    return _player.setAudioSource(
+      AudioSource.file(
+        song.uri!,
+        tag: MediaItem(
+          id: song.id,
+          title: song.title,
+          artist: song.artist,
+          artUri: song.hasCover ? Uri.file(song.coverPath!) : null,
+        ),
+      ),
+    );
+  }
 
   @override
   Future<void> play() => _player.play();

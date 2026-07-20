@@ -30,35 +30,86 @@ class AppShell extends StatelessWidget {
         ? navigation.prevTab
         : navigation.screen;
 
-    return Scaffold(
-      backgroundColor: AppColors.bg,
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: SafeArea(bottom: false, child: _tab(activeTab)),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (hasCurrent)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10),
-                    child: MiniPlayer(),
-                  ),
-                if (hasCurrent) const SizedBox(height: 8),
-                const _BottomNav(),
-              ],
+    return PopScope(
+      canPop: navigation.screen == AppScreen.library && !navigation.createSheetOpen,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        if (navigation.createSheetOpen) {
+          navigation.closeCreateSheet();
+        } else if (navigation.screen == AppScreen.nowPlaying) {
+          navigation.go(AppScreen.library);
+        } else if (navigation.screen == AppScreen.detail) {
+          navigation.backToPlaylists();
+        } else if (navigation.screen != AppScreen.library) {
+          navigation.go(AppScreen.library);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.bg,
+        body: Stack(
+          children: [
+            Positioned.fill(
+              child: SafeArea(bottom: false, child: _tab(activeTab)),
             ),
-          ),
-          if (navigation.screen == AppScreen.nowPlaying && hasCurrent)
-            const Positioned.fill(child: NowPlayingView()),
-          if (navigation.createSheetOpen)
-            const Positioned.fill(child: CreatePlaylistSheet()),
-        ],
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (hasCurrent)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      child: MiniPlayer(),
+                    ),
+                  if (hasCurrent) const SizedBox(height: 8),
+                  const _BottomNav(),
+                ],
+              ),
+            ),
+            Positioned.fill(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (child, animation) {
+                  return SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0, 1),
+                      end: Offset.zero,
+                    ).animate(CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeOutCubic,
+                    )),
+                    child: child,
+                  );
+                },
+                child: (navigation.screen == AppScreen.nowPlaying && hasCurrent)
+                    ? const NowPlayingView(key: ValueKey('now_playing'))
+                    : const SizedBox.shrink(key: ValueKey('empty_np')),
+              ),
+            ),
+            Positioned.fill(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (child, animation) {
+                  return SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0, 1),
+                      end: Offset.zero,
+                    ).animate(CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeOutCubic,
+                    )),
+                    child: child,
+                  );
+                },
+                child: navigation.createSheetOpen
+                    ? const CreatePlaylistSheet(key: ValueKey('create_sheet'))
+                    : const SizedBox.shrink(key: ValueKey('empty_cs')),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

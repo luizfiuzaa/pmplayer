@@ -9,7 +9,7 @@ import 'package:pmplayer/main.dart';
 /// Engine de áudio inerte para os testes de widget.
 class InertAudioEngine implements AudioEngine {
   @override
-  Future<Duration?> load(String uri) async => null;
+  Future<Duration?> load(Song song) async => null;
   @override
   Future<void> play() async {}
   @override

@@ -11,6 +11,7 @@ import '../../core/widgets/track_tile.dart';
 import '../navigation/navigation_controller.dart';
 import '../player/player_view_model.dart';
 import 'cover_image_picker.dart';
+import '../../core/utils/ui_utils.dart';
 
 /// Tela de detalhe de uma playlist: capa, ações e faixas. Fiel ao bloco
 /// PLAYLIST DETAIL do design.
@@ -98,7 +99,7 @@ class PlaylistDetailView extends StatelessWidget {
             glyphSize: 20,
             heartSize: 18,
             onTap: () => player.play(song.id),
-            onToggleFavorite: () => library.toggleFavorite(song.id),
+            onToggleFavorite: () => UiUtils.toggleFavorite(context, song.id),
           ),
       ],
     );

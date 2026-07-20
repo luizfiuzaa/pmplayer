@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/models/playlist.dart';
 import '../../core/models/song.dart';
@@ -16,19 +17,45 @@ class PlayerViewModel extends ChangeNotifier {
     required this.library,
     required this.navigation,
     required AudioEngine engine,
+    this.prefs,
     Random? random,
   }) : _random = random ?? Random() {
     _engine = engine;
     _currentId = library.allSongIds.isEmpty ? null : library.allSongIds.first;
     _base = library.allSongIds;
     _order = library.allSongIds;
+
+    if (prefs != null) {
+      final savedId = prefs!.getString('player_current_id');
+      if (savedId != null && library.songByIdOrNull(savedId) != null) {
+        _currentId = savedId;
+      }
+      _progress = prefs!.getInt('player_progress') ?? 0;
+      _shuffle = prefs!.getBool('player_shuffle') ?? false;
+      _repeat = prefs!.getBool('player_repeat') ?? false;
+      
+      final savedBase = prefs!.getStringList('player_base');
+      if (savedBase != null && savedBase.isNotEmpty) _base = savedBase;
+      
+      final savedOrder = prefs!.getStringList('player_order');
+      if (savedOrder != null && savedOrder.isNotEmpty) _order = savedOrder;
+      
+      _contextLabel = prefs!.getString('player_context') ?? 'Tocando da biblioteca';
+    }
+
     _positionSub = _engine.positionStream.listen(_onPosition);
     _completedSub = _engine.onCompleted.listen((_) => _onCompleted());
+
+    if (_currentId != null && _progress > 0) {
+      _ensureLoaded();
+      _engine.seek(Duration(seconds: _progress));
+    }
   }
 
   final LibraryStore library;
   final NavigationController navigation;
   late final AudioEngine _engine;
+  final SharedPreferences? prefs;
   final Random _random;
   late final StreamSubscription<Duration> _positionSub;
   late final StreamSubscription<void> _completedSub;
@@ -61,6 +88,17 @@ class PlayerViewModel extends ChangeNotifier {
     return (_progress / song.durationSeconds).clamp(0.0, 1.0);
   }
 
+  void _saveState() {
+    if (prefs == null) return;
+    if (_currentId != null) prefs!.setString('player_current_id', _currentId!);
+    prefs!.setInt('player_progress', _progress);
+    prefs!.setBool('player_shuffle', _shuffle);
+    prefs!.setBool('player_repeat', _repeat);
+    prefs!.setStringList('player_base', _base);
+    prefs!.setStringList('player_order', _order);
+    prefs!.setString('player_context', _contextLabel);
+  }
+
   // ── Comandos ──────────────────────────────────────────────────────────────
   void play(String id, {List<String>? context, String? label}) {
     final base = context ?? library.allSongIds;
@@ -75,6 +113,7 @@ class PlayerViewModel extends ChangeNotifier {
     _ensureLoaded();
     _engine.play();
     navigation.openNowPlaying();
+    _saveState();
     notifyListeners();
   }
 
@@ -97,6 +136,7 @@ class PlayerViewModel extends ChangeNotifier {
     _progress = 0;
     if (auto) _playing = true;
     _restartSource();
+    _saveState();
     notifyListeners();
   }
 
@@ -112,17 +152,20 @@ class PlayerViewModel extends ChangeNotifier {
     _currentId = _order[(i - 1 + _order.length) % _order.length];
     _progress = 0;
     _restartSource();
+    _saveState();
     notifyListeners();
   }
 
   void toggleShuffle() {
     _shuffle = !_shuffle;
     _order = _shuffle ? _shuffled(_base, first: _currentId) : List.of(_base);
+    _saveState();
     notifyListeners();
   }
 
   void toggleRepeat() {
     _repeat = !_repeat;
+    _saveState();
     notifyListeners();
   }
 
@@ -131,6 +174,7 @@ class PlayerViewModel extends ChangeNotifier {
     if (song == null) return;
     _progress = (fraction.clamp(0.0, 1.0) * song.durationSeconds).round();
     _engine.seek(Duration(seconds: _progress));
+    prefs?.setInt('player_progress', _progress);
     notifyListeners();
   }
 
@@ -166,6 +210,7 @@ class PlayerViewModel extends ChangeNotifier {
         : seconds;
     if (clamped == _progress) return;
     _progress = clamped;
+    prefs?.setInt('player_progress', _progress);
     notifyListeners();
   }
 
@@ -193,7 +238,7 @@ class PlayerViewModel extends ChangeNotifier {
     final song = currentSong;
     if (song == null || _loadedId == _currentId) return;
     if (song.uri != null) {
-      _engine.load(song.uri!);
+      _engine.load(song);
       _loadedId = _currentId;
     }
   }

@@ -50,7 +50,18 @@ class FileSelectorMusicImporter implements MusicImporter {
 
   @override
   Future<List<Song>> pickAndImport() async {
-    final files = await openFiles(acceptedTypeGroups: [_audioGroup]);
+    final dirPath = await getDirectoryPath();
+    if (dirPath == null) return const [];
+
+    final directory = Directory(dirPath);
+    final allFiles = directory.listSync(recursive: true).whereType<File>();
+    
+    final audioExtensions = ['.mp3', '.m4a', '.aac', '.flac', '.wav', '.ogg', '.opus', '.wma'];
+    final files = allFiles.where((file) {
+      final ext = p.extension(file.path).toLowerCase();
+      return audioExtensions.contains(ext);
+    }).toList();
+
     if (files.isEmpty) return const [];
 
     final coversDir = await _coversDirectory();

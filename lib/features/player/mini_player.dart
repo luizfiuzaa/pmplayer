@@ -9,6 +9,7 @@ import '../../core/widgets/heart_button.dart';
 import '../../core/widgets/song_cover.dart';
 import '../navigation/navigation_controller.dart';
 import 'player_view_model.dart';
+import '../../core/utils/ui_utils.dart';
 
 /// Mini-player fixo acima do menu inferior. Abre o player ao toque.
 /// Fiel ao bloco MINI-PLAYER do design.
@@ -77,7 +78,7 @@ class MiniPlayer extends StatelessWidget {
               ),
               HeartButton(
                 isFavorite: library.isFavorite(song.id),
-                onPressed: () => library.toggleFavorite(song.id),
+                onPressed: () => UiUtils.toggleFavorite(context, song.id),
                 size: 20,
               ),
               InkResponse(

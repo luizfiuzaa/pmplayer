@@ -7,6 +7,7 @@ import '../../core/theme/app_typography.dart';
 import '../../core/widgets/track_tile.dart';
 import '../player/player_view_model.dart';
 import 'import/music_importer.dart';
+import '../../core/utils/ui_utils.dart';
 
 /// Tela "Ouvir agora": cabeçalho, busca (decorativa), ação de adicionar faixas,
 /// modo aleatório e a lista de todas as faixas. Fiel ao bloco LIBRARY do design.
@@ -36,16 +37,6 @@ class LibraryView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'SUA BIBLIOTECA',
-                    style: AppTypography.bodyStyle(
-                      size: 12,
-                      weight: FontWeight.w700,
-                      height: 1.2,
-                      letterSpacing: 1.68,
-                      color: AppColors.accent2_700,
-                    ),
-                  ),
                   const SizedBox(height: 2),
                   Text(
                     'Ouvir agora',
@@ -54,19 +45,29 @@ class LibraryView extends StatelessWidget {
                 ],
               ),
             ),
-            Container(
-              width: 46,
-              height: 46,
-              alignment: Alignment.center,
-              decoration: const BoxDecoration(
-                color: AppColors.accent2_500,
-                shape: BoxShape.circle,
-              ),
-              child: Text(
-                'O',
-                style: AppTypography.headingStyle(
-                  size: 19,
-                  color: AppColors.bg,
+            Material(
+              color: AppColors.accent2_500,
+              shape: const CircleBorder(),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: songs.isEmpty
+                    ? null
+                    : () {
+                        if (player.shuffle) player.toggleShuffle();
+                        player.play(
+                          songs.first.id,
+                          label: 'Tocando da biblioteca',
+                        );
+                      },
+                child: Container(
+                  width: 46,
+                  height: 46,
+                  alignment: Alignment.center,
+                  child: const Icon(
+                    Icons.play_arrow_rounded,
+                    size: 28,
+                    color: AppColors.bg,
+                  ),
                 ),
               ),
             ),
@@ -110,7 +111,7 @@ class LibraryView extends StatelessWidget {
               isFavorite: library.isFavorite(song.id),
               showDuration: true,
               onTap: () => player.play(song.id),
-              onToggleFavorite: () => library.toggleFavorite(song.id),
+              onToggleFavorite: () => UiUtils.toggleFavorite(context, song.id),
             ),
         ],
       ],

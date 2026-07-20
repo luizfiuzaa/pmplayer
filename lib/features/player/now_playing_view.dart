@@ -10,6 +10,7 @@ import '../../core/widgets/cover_artwork.dart';
 import '../../core/widgets/music_glyph.dart';
 import '../navigation/navigation_controller.dart';
 import 'player_view_model.dart';
+import '../../core/utils/ui_utils.dart';
 
 /// Player em tela cheia. Fiel ao bloco NOW PLAYING do design.
 class NowPlayingView extends StatelessWidget {
@@ -54,7 +55,7 @@ class NowPlayingView extends StatelessWidget {
               _TitleRow(
                 song: song,
                 isFavorite: library.isFavorite(song.id),
-                onToggleFavorite: () => library.toggleFavorite(song.id),
+                onToggleFavorite: () => UiUtils.toggleFavorite(context, song.id),
               ),
               const SizedBox(height: 22),
               _ProgressBar(

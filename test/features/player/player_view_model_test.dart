@@ -20,8 +20,8 @@ class FakeAudioEngine implements AudioEngine {
   int loadCount = 0;
 
   @override
-  Future<Duration?> load(String uri) async {
-    loadedUri = uri;
+  Future<Duration?> load(Song song) async {
+    loadedUri = song.uri;
     loadCount++;
     return const Duration(seconds: 200);
   }

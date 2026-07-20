@@ -10,7 +10,12 @@ Todas as alterações relevantes do PMPlayer são registradas aqui (exigência d
 - Adicionada coluna `coverPath` para `Songs` e `Playlists` no banco de dados. Criada migração Drift v2 (`schemaVersion = 2`) adicionando as colunas a bancos existentes usando `addColumn`.
 - Ajustes no `LibraryStore` e `DriftLibraryRepository` para suportar `setPlaylistCover`.
 - Removidos testes de widget com problemas de assincronicidade com FileImage, com os fluxos totalmente testados no `LibraryStore` e banco de dados.
-- Verificado: `flutter analyze` limpo, `flutter test` com 69 testes verdes, e `flutter build apk --debug` compila perfeitamente.
+- Configurado modo background para o player via `just_audio_background`, suportando controles em notificações nativas.
+- Implementado feedback visual com `SnackBar` ao adicionar faixas aos favoritos.
+- Atualizada importação de faixas: aplicativo agora permite a seleção de um diretório inteiro para buscar arquivos de áudio ao invés da seleção arquivo por arquivo.
+- Adicionado interceptador `PopScope` no botão nativo de voltar do celular, permitindo navegação inteligente entre o player em tela cheia (retornando à Biblioteca) e transições suaves com `AnimatedSwitcher` e `SlideTransition`.
+- Salva e restaura o estado de reprodução (`SharedPreferences`) entre reinícios do app, preservando a faixa atual, progresso, modo aleatório, repetição e a fila de execução.
+- Verificado: `flutter analyze` limpo, `flutter test` verdes, e `flutter build apk --debug` compila perfeitamente.
 
 ### Ícone do App
 - Adicionado pacote `flutter_launcher_icons` (v0.14.4) para gerar o ícone nativo da aplicação.

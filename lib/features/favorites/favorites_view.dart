@@ -7,6 +7,7 @@ import '../../core/theme/app_shadows.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/widgets/track_tile.dart';
 import '../player/player_view_model.dart';
+import '../../core/utils/ui_utils.dart';
 
 /// Tela "Favoritas": cabeçalho com o coração, botão Tocar e a lista de
 /// favoritas (ou o estado vazio). Fiel ao bloco FAVORITES do design.
@@ -71,7 +72,7 @@ class FavoritesView extends StatelessWidget {
               isCurrent: song.id == player.currentId,
               isFavorite: library.isFavorite(song.id),
               onTap: () => player.play(song.id),
-              onToggleFavorite: () => library.toggleFavorite(song.id),
+              onToggleFavorite: () => UiUtils.toggleFavorite(context, song.id),
             ),
       ],
     );

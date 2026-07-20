@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:just_audio_background/just_audio_background.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/data/database/app_database.dart';
 import 'core/data/drift_library_repository.dart';
@@ -17,9 +19,15 @@ import 'features/shell/app_shell.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await JustAudioBackground.init(
+    androidNotificationChannelId: 'com.example.pmplayer.channel.audio',
+    androidNotificationChannelName: 'Audio playback',
+    androidNotificationOngoing: true,
+  );
   final repository = DriftLibraryRepository(AppDatabase());
   final snapshot = await repository.load();
-  runApp(PmPlayerApp(initial: snapshot, repository: repository));
+  final prefs = await SharedPreferences.getInstance();
+  runApp(PmPlayerApp(initial: snapshot, repository: repository, prefs: prefs));
 }
 
 /// PMPlayer — reprodutor de áudio offline, arquitetura MVVM feature-wise.
@@ -34,6 +42,7 @@ class PmPlayerApp extends StatelessWidget {
     this.engine,
     this.importer,
     this.coverPicker,
+    this.prefs,
   });
 
   final LibrarySnapshot initial;
@@ -41,6 +50,7 @@ class PmPlayerApp extends StatelessWidget {
   final AudioEngine? engine;
   final MusicImporter? importer;
   final CoverImagePicker? coverPicker;
+  final SharedPreferences? prefs;
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +65,7 @@ class PmPlayerApp extends StatelessWidget {
             library: context.read<LibraryStore>(),
             navigation: context.read<NavigationController>(),
             engine: engine ?? JustAudioEngine(),
+            prefs: prefs,
           ),
         ),
         ChangeNotifierProvider(
