@@ -4,6 +4,11 @@ Todas as alterações relevantes do PMPlayer são registradas aqui (exigência d
 
 ## [Não lançado]
 
+### Correção — notificação de mídia não aparecia em builds de release
+- **Sintoma:** a notificação de controle da música não aparecia no APK de release (funcionava em debug).
+- **Causa raiz:** o botão de shuffle é um `MediaControl.custom` cujo ícone (`drawable/ic_shuffle`/`ic_shuffle_on`) é referenciado apenas por nome em runtime (`getIdentifier`), em [pm_audio_handler.dart](pmplayer/lib/core/playback/pm_audio_handler.dart#L78-L84). O resource shrinker do build de release (ativo por padrão no AGP 8.11) marcava esses drawables como não usados (`reachable=false`) e os removia; sem eles `getIdentifier()` retorna `0` e o `audio_service` lança `IllegalArgumentException: You must specify an icon resource id to build a CustomAction`, abortando a atualização do `playbackState` — a sessão de mídia ficava em `state=NONE` e a notificação nunca era postada. Em debug o shrinker não roda, por isso só falhava em release.
+- **Correção:** criado [android/app/src/main/res/raw/keep.xml](pmplayer/android/app/src/main/res/raw/keep.xml) com `tools:keep="@drawable/ic_shuffle,@drawable/ic_shuffle_on"`, preservando os ícones no shrink de release. Verificado no emulador (Android 17): notificação postada e `state=PLAYING`.
+
 ### CI/CD — filtro paths-ignore para README.md
 - Configurado `paths-ignore: ['README.md']` em [.github/workflows/build.yml](pmplayer/.github/workflows/build.yml#L6-L11) nos gatilhos `push` e `pull_request`, ignorando a execução de checagem de código e build de APK quando apenas o `README.md` for modificado.
 

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Ícones dos controles customizados da notificação de mídia (audio_service).
+  São referenciados apenas por nome em runtime — MediaControl.custom(
+  androidIcon: 'drawable/ic_shuffle') em lib/core/playback/pm_audio_handler.dart —
+  então o resource shrinker do build de release os marca como "não usados" e os
+  remove. Sem eles, getIdentifier() retorna 0 e o audio_service lança
+  IllegalArgumentException ("You must specify an icon resource id to build a
+  CustomAction"), abortando o playbackState e impedindo a notificação de aparecer.
+  Este keep.xml instrui o shrinker a preservá-los.
+-->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/ic_shuffle,@drawable/ic_shuffle_on" />
