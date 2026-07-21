@@ -3,8 +3,16 @@ name: Flutter CI/CD
 on:
   push:
     branches: [ "main", "master" ]
+    paths-ignore:
+      - 'README.md'
+      - 'CLAUDE.md'
+      - LICENSE
   pull_request:
     branches: [ "main", "master" ]
+    paths-ignore:
+      - 'README.md'
+      - 'CLAUDE.md'
+      - LICENSE
   workflow_dispatch:
 
 jobs:

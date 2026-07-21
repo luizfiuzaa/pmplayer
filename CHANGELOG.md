@@ -4,6 +4,9 @@ Todas as alterações relevantes do PMPlayer são registradas aqui (exigência d
 
 ## [Não lançado]
 
+### CI/CD — filtro paths-ignore para README.md
+- Configurado `paths-ignore: ['README.md']` em [.github/workflows/build.yml](pmplayer/.github/workflows/build.yml#L6-L11) nos gatilhos `push` e `pull_request`, ignorando a execução de checagem de código e build de APK quando apenas o `README.md` for modificado.
+
 ## [v0.1.0] - 2026-07-21
 
 ### Documentação — README.md completo do projeto
