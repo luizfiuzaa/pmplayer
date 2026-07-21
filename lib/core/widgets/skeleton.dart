@@ -65,12 +65,7 @@ class _SlideTransform extends GradientTransform {
 
 /// Caixa base do esqueleto (retângulo arredondado sólido).
 class SkeletonBox extends StatelessWidget {
-  const SkeletonBox({
-    super.key,
-    this.width,
-    this.height = 12,
-    this.radius = 8,
-  });
+  const SkeletonBox({super.key, this.width, this.height = 12, this.radius = 8});
 
   final double? width;
   final double height;

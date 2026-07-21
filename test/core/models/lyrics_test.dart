@@ -26,28 +26,39 @@ void main() {
     });
 
     test('primeira linha tem tempo e texto corretos', () {
-      expect(lyrics.lines.first.time, const Duration(seconds: 4, milliseconds: 410));
+      expect(
+        lyrics.lines.first.time,
+        const Duration(seconds: 4, milliseconds: 410),
+      );
       expect(lyrics.lines.first.text, 'Yeah!');
     });
 
     test('junta a linha quebrada à linha com timestamp', () {
       final line = lyrics.lines[1];
       expect(line.time, const Duration(seconds: 31, milliseconds: 70));
-      expect(line.text, "This ain't no motherfuckin' stick up, pick the stick up");
+      expect(
+        line.text,
+        "This ain't no motherfuckin' stick up, pick the stick up",
+      );
     });
 
     test('separa timestamp no meio do texto', () {
       final texts = lyrics.lines.map((l) => l.text).toList();
       expect(
         texts,
-        contains('Round bumping around me, you\'ll want to run from underground'),
+        contains(
+          'Round bumping around me, you\'ll want to run from underground',
+        ),
       );
       expect(texts, contains('At the best, walk the line'));
     });
 
     test('activeIndex acompanha a posição', () {
       expect(lyrics.activeIndex(const Duration(seconds: 2)), -1);
-      expect(lyrics.activeIndex(const Duration(seconds: 4, milliseconds: 500)), 0);
+      expect(
+        lyrics.activeIndex(const Duration(seconds: 4, milliseconds: 500)),
+        0,
+      );
       expect(lyrics.activeIndex(const Duration(seconds: 32)), 1);
     });
   });

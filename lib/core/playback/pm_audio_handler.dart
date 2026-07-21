@@ -50,7 +50,10 @@ class PmAudioHandler extends BaseAudioHandler {
   Future<void> seek(Duration position) => player.seek(position);
 
   @override
-  Future<dynamic> customAction(String name, [Map<String, dynamic>? extras]) async {
+  Future<dynamic> customAction(
+    String name, [
+    Map<String, dynamic>? extras,
+  ]) async {
     if (name == 'shuffle') _remote.add(PlayerRemoteAction.shuffle);
   }
 
@@ -73,8 +76,9 @@ class PmAudioHandler extends BaseAudioHandler {
       playbackState.value.copyWith(
         controls: [
           MediaControl.custom(
-            androidIcon:
-                _shuffle ? 'drawable/ic_shuffle_on' : 'drawable/ic_shuffle',
+            androidIcon: _shuffle
+                ? 'drawable/ic_shuffle_on'
+                : 'drawable/ic_shuffle',
             label: 'Shuffle',
             name: 'shuffle',
           ),

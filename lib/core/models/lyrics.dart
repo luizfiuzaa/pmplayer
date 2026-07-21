@@ -33,7 +33,10 @@ class Lyrics {
   // começa com letra. Timestamps começam com dígito, então não casam aqui.
   static final _meta = RegExp(r'\[[a-zA-Z][a-zA-Z0-9]*:[^\]]*\]');
   static final _timestamp = RegExp(r'\[(\d{1,3}):(\d{2})(?:[.:](\d{1,3}))?\]');
-  static final _offset = RegExp(r'\[offset:\s*([+-]?\d+)\s*\]', caseSensitive: false);
+  static final _offset = RegExp(
+    r'\[offset:\s*([+-]?\d+)\s*\]',
+    caseSensitive: false,
+  );
   static final _spaces = RegExp(r'\s+');
 
   /// Interpreta a letra crua (LRC ou texto simples).
@@ -62,7 +65,9 @@ class Lyrics {
     final lines = <LyricLine>[];
     for (var i = 0; i < matches.length; i++) {
       final m = matches[i];
-      final end = i + 1 < matches.length ? matches[i + 1].start : cleaned.length;
+      final end = i + 1 < matches.length
+          ? matches[i + 1].start
+          : cleaned.length;
       final text = cleaned
           .substring(m.end, end)
           .replaceAll('\n', ' ')
@@ -76,7 +81,8 @@ class Lyrics {
       final millis = fraction == null
           ? 0
           : int.parse(fraction.padRight(3, '0').substring(0, 3));
-      var time = Duration(minutes: minutes, seconds: seconds, milliseconds: millis) +
+      var time =
+          Duration(minutes: minutes, seconds: seconds, milliseconds: millis) +
           Duration(milliseconds: offsetMs);
       if (time < Duration.zero) time = Duration.zero;
       lines.add(LyricLine(time, text));

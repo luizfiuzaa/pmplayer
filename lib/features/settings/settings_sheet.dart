@@ -47,7 +47,10 @@ class SettingsSheet extends StatelessWidget {
           const SizedBox(height: 24),
           Text(
             'Configurações',
-            style: AppTypography.headingStyle(size: 24, color: context.colors.text),
+            style: AppTypography.headingStyle(
+              size: 24,
+              color: context.colors.text,
+            ),
           ),
           const SizedBox(height: 32),
           Text(

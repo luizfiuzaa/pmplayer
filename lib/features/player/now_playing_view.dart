@@ -22,10 +22,14 @@ class NowPlayingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final player = context.watch<PlayerViewModel>();
+    final song = context.select<PlayerViewModel, Song?>((p) => p.currentSong);
+    final contextLabel = context.select<PlayerViewModel, String>(
+      (p) => p.contextLabel,
+    );
+    final isPlaying = context.select<PlayerViewModel, bool>((p) => p.isPlaying);
+    final player = context.read<PlayerViewModel>();
     final library = context.watch<LibraryStore>();
     final navigation = context.read<NavigationController>();
-    final song = player.currentSong;
     if (song == null) return SizedBox.shrink();
 
     final npFirst = song.palette?.first ?? context.colors.accent2_300;
@@ -47,7 +51,7 @@ class NowPlayingView extends StatelessWidget {
           child: Column(
             children: [
               _TopBar(
-                contextLabel: player.contextLabel,
+                contextLabel: contextLabel,
                 onMinimize: navigation.minimize,
                 onMore: () => AddToPlaylistSheet.show(context, song.id),
               ),
@@ -61,7 +65,7 @@ class NowPlayingView extends StatelessWidget {
                     key: ValueKey(song.id),
                     child: LyricsArtwork(
                       song: song,
-                      front: _Artwork(song: song, spinning: player.isPlaying),
+                      front: _Artwork(song: song, spinning: isPlaying),
                     ),
                   ),
                 ),
@@ -74,18 +78,24 @@ class NowPlayingView extends StatelessWidget {
                 child: _TitleRow(
                   key: ValueKey(song.id),
                   song: song,
-                  playing: player.isPlaying,
+                  playing: isPlaying,
                   isFavorite: library.isFavorite(song.id),
-                  onToggleFavorite: () => UiUtils.toggleFavorite(context, song.id),
+                  onToggleFavorite: () =>
+                      UiUtils.toggleFavorite(context, song.id),
                 ),
               ),
               SizedBox(height: 22),
-              _ProgressBar(
-                fraction: player.progressFraction,
-                durationSeconds: song.durationSeconds,
-                durationLabel: song.durationLabel,
-                onScrubStart: player.beginScrub,
-                onScrubEnd: player.endScrub,
+              Selector<PlayerViewModel, double>(
+                selector: (_, p) => p.progressFraction,
+                builder: (context, fraction, _) {
+                  return _ProgressBar(
+                    fraction: fraction,
+                    durationSeconds: song.durationSeconds,
+                    durationLabel: song.durationLabel,
+                    onScrubStart: player.beginScrub,
+                    onScrubEnd: player.endScrub,
+                  );
+                },
               ),
               SizedBox(height: 14),
               _Controls(player: player),
@@ -276,7 +286,9 @@ class _TitleRow extends StatelessWidget {
             child: Icon(
               isFavorite ? Icons.favorite : Icons.favorite_border,
               size: 28,
-              color: isFavorite ? context.colors.accent : context.colors.neutral500,
+              color: isFavorite
+                  ? context.colors.accent
+                  : context.colors.neutral500,
             ),
           ),
         ),
@@ -356,7 +368,10 @@ class _ProgressBarState extends State<_ProgressBar> {
                       Container(
                         height: 6,
                         decoration: BoxDecoration(
-                          color: context.colors.alpha(context.colors.text, 0.15),
+                          color: context.colors.alpha(
+                            context.colors.text,
+                            0.15,
+                          ),
                           borderRadius: BorderRadius.circular(999),
                         ),
                       ),
@@ -422,6 +437,10 @@ class _Controls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isPlaying = context.select<PlayerViewModel, bool>((p) => p.isPlaying);
+    final shuffle = context.select<PlayerViewModel, bool>((p) => p.shuffle);
+    final repeat = context.select<PlayerViewModel, bool>((p) => p.repeat);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -432,7 +451,7 @@ class _Controls extends StatelessWidget {
             child: Icon(
               Icons.shuffle,
               size: 24,
-              color: player.shuffle
+              color: shuffle
                   ? context.colors.accent2_700
                   : context.colors.neutral500,
             ),
@@ -442,7 +461,11 @@ class _Controls extends StatelessWidget {
           onTap: player.prev,
           child: Padding(
             padding: EdgeInsets.all(8),
-            child: Icon(Icons.skip_previous, size: 34, color: context.colors.text),
+            child: Icon(
+              Icons.skip_previous,
+              size: 34,
+              color: context.colors.text,
+            ),
           ),
         ),
         ScaleOnPress(
@@ -454,7 +477,7 @@ class _Controls extends StatelessWidget {
               width: 78,
               height: 78,
               child: Icon(
-                player.isPlaying ? Icons.pause : Icons.play_arrow,
+                isPlaying ? Icons.pause : Icons.play_arrow,
                 size: 34,
                 color: context.colors.bg,
               ),
@@ -475,7 +498,7 @@ class _Controls extends StatelessWidget {
             child: Icon(
               Icons.repeat,
               size: 24,
-              color: player.repeat
+              color: repeat
                   ? context.colors.accent2_700
                   : context.colors.neutral500,
             ),

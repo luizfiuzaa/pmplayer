@@ -56,4 +56,49 @@ void main() {
     expect(song.palette, hasLength(2));
     expect(song.isGeneric, isFalse);
   });
+
+  test('converte IsolateSongData para objeto Song corretamente', () {
+    const isolateData = IsolateSongData(
+      path: '/music/song.mp3',
+      title: 'Som do Isolate',
+      artist: 'Artista Isolate',
+      durationSeconds: 180,
+      coverPath: '/covers/123.jpg',
+      lyrics: 'Letra no isolate',
+      paletteColors: [0xFF112233, 0xFF445566],
+    );
+
+    final song = songFromIsolateData(isolateData);
+    expect(song.id, '/music/song.mp3');
+    expect(song.title, 'Som do Isolate');
+    expect(song.artist, 'Artista Isolate');
+    expect(song.durationSeconds, 180);
+    expect(song.coverPath, '/covers/123.jpg');
+    expect(song.lyrics, 'Letra no isolate');
+    expect(song.palette, equals(const [Color(0xFF112233), Color(0xFF445566)]));
+  });
+
+  test('filtra extensões de áudio suportadas corretamente', () {
+    const audioExtensions = [
+      '.mp3',
+      '.m4a',
+      '.aac',
+      '.flac',
+      '.wav',
+      '.ogg',
+      '.opus',
+      '.wma',
+    ];
+    expect(isAudioFile('/caminho/musica.mp3', audioExtensions), isTrue);
+    expect(isAudioFile('/caminho/musica.FLAC', audioExtensions), isTrue);
+    expect(isAudioFile('/caminho/imagem.jpg', audioExtensions), isFalse);
+    expect(isAudioFile('/caminho/texto.txt', audioExtensions), isFalse);
+  });
+
+  test('extrai paleta em pure Dart a partir de bytes de imagem no Isolate', () {
+    final fakeImageBytes = List<int>.generate(600, (i) => (i * 7) % 256);
+    final palette = extractPaletteFromBytes(fakeImageBytes);
+    expect(palette, isNotNull);
+    expect(palette, hasLength(2));
+  });
 }

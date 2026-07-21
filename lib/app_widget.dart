@@ -83,9 +83,7 @@ class _PmPlayerAppState extends State<PmPlayerApp> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) => SettingsStore(widget.prefs),
-        ),
+        ChangeNotifierProvider(create: (_) => SettingsStore(widget.prefs)),
         ChangeNotifierProvider(
           create: (_) => LibraryStore(
             initial: widget.initial,
@@ -97,7 +95,8 @@ class _PmPlayerAppState extends State<PmPlayerApp> with WidgetsBindingObserver {
           create: (context) => PlayerViewModel(
             library: context.read<LibraryStore>(),
             navigation: context.read<NavigationController>(),
-            engine: widget.engine ??
+            engine:
+                widget.engine ??
                 (throw StateError('PmPlayerApp requer um AudioEngine')),
             prefs: widget.prefs,
           ),

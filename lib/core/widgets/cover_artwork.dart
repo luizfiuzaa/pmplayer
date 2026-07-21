@@ -52,7 +52,12 @@ class CoverArtwork extends StatelessWidget {
               ),
         image: hasImage
             ? DecorationImage(
-                image: FileImage(File(imagePath!)),
+                image: (size != null && size! > 0)
+                    ? ResizeImage(
+                        FileImage(File(imagePath!)),
+                        width: (size! * 2.5).toInt(),
+                      )
+                    : FileImage(File(imagePath!)),
                 fit: BoxFit.cover,
               )
             : null,

@@ -70,8 +70,10 @@ class AppColors extends ThemeExtension<AppColors> {
   });
 
   Color get divider => text.withValues(alpha: 0.16);
-  Color alpha(Color color, double pct) => color.withValues(alpha: pct.clamp(0.0, 1.0));
-  Color mix(Color a, Color b, double pctA) => Color.lerp(b, a, pctA.clamp(0.0, 1.0))!;
+  Color alpha(Color color, double pct) =>
+      color.withValues(alpha: pct.clamp(0.0, 1.0));
+  Color mix(Color a, Color b, double pctA) =>
+      Color.lerp(b, a, pctA.clamp(0.0, 1.0))!;
 
   @override
   AppColors copyWith({
@@ -252,7 +254,6 @@ class AppColors extends ThemeExtension<AppColors> {
     accent2_800: Color(0xFFC3D4A4),
     accent2_900: Color(0xFFE2ECCC),
   );
-
 }
 
 extension AppColorsExtension on BuildContext {

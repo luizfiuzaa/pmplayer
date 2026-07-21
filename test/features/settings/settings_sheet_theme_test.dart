@@ -34,7 +34,9 @@ Color _surfaceColor(WidgetTester tester) {
 }
 
 void main() {
-  testWidgets('a superfície do sheet acompanha a troca de tema', (tester) async {
+  testWidgets('a superfície do sheet acompanha a troca de tema', (
+    tester,
+  ) async {
     await tester.pumpWidget(_host());
     // Começa no tema do sistema (claro no teste).
     expect(_surfaceColor(tester), AppColors.light.bg);

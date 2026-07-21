@@ -21,7 +21,10 @@ class PlaylistDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final library = context.watch<LibraryStore>();
-    final player = context.watch<PlayerViewModel>();
+    final currentId = context.select<PlayerViewModel, String?>(
+      (p) => p.currentId,
+    );
+    final player = context.read<PlayerViewModel>();
     final navigation = context.read<NavigationController>();
     final playlist = library.playlistById(navigation.activePlaylistId);
 
@@ -92,7 +95,7 @@ class PlaylistDetailView extends StatelessWidget {
         for (final song in songs)
           TrackTile(
             song: song,
-            isCurrent: song.id == player.currentId,
+            isCurrent: song.id == currentId,
             isFavorite: library.isFavorite(song.id),
             coverSize: 48,
             coverRadius: 12,
@@ -188,7 +191,11 @@ class _BackButton extends StatelessWidget {
           child: SizedBox(
             width: 38,
             height: 38,
-            child: Icon(Icons.chevron_left, size: 22, color: context.colors.text),
+            child: Icon(
+              Icons.chevron_left,
+              size: 22,
+              color: context.colors.text,
+            ),
           ),
         ),
       ),
@@ -247,7 +254,11 @@ class _ShuffleButton extends StatelessWidget {
         child: SizedBox(
           width: 50,
           height: 50,
-          child: Icon(Icons.shuffle, size: 20, color: context.colors.accent2_800),
+          child: Icon(
+            Icons.shuffle,
+            size: 20,
+            color: context.colors.accent2_800,
+          ),
         ),
       ),
     );

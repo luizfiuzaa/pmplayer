@@ -27,8 +27,10 @@ class RecordingRepository implements LibraryRepository {
       playlistCovers[playlistId] = coverPath;
   final Map<String, List<String>> playlistSongs = {};
   @override
-  Future<void> setPlaylistSongs(String playlistId, List<String> songIds) async =>
-      playlistSongs[playlistId] = songIds;
+  Future<void> setPlaylistSongs(
+    String playlistId,
+    List<String> songIds,
+  ) async => playlistSongs[playlistId] = songIds;
 }
 
 LibraryStore buildStore([LibraryRepository? repo]) =>
@@ -63,9 +65,24 @@ void main() {
 
   group('busca (matching)', () {
     final songs = [
-      const Song(id: 'a', title: 'Maré Cheia', artist: 'João Silva', durationSeconds: 1),
-      const Song(id: 'b', title: 'Terra Vermelha', artist: 'Ana', durationSeconds: 1),
-      const Song(id: 'c', title: 'Sol', artist: 'JOÃO Pereira', durationSeconds: 1),
+      const Song(
+        id: 'a',
+        title: 'Maré Cheia',
+        artist: 'João Silva',
+        durationSeconds: 1,
+      ),
+      const Song(
+        id: 'b',
+        title: 'Terra Vermelha',
+        artist: 'Ana',
+        durationSeconds: 1,
+      ),
+      const Song(
+        id: 'c',
+        title: 'Sol',
+        artist: 'JOÃO Pereira',
+        durationSeconds: 1,
+      ),
     ];
 
     test('query vazia devolve tudo', () {
@@ -90,6 +107,28 @@ void main() {
 
     test('sem correspondência devolve vazio', () {
       expect(LibraryStore.matching(songs, 'zzz'), isEmpty);
+    });
+
+    test('filtragem em grande volume é extremamente rápida', () {
+      final manySongs = List.generate(
+        5000,
+        (i) => Song(
+          id: 'song_$i',
+          title: 'Música de Exemplo $i com acentuação ÁÈÌÔÚ',
+          artist: 'Artista Número $i da Silva',
+          durationSeconds: 180,
+        ),
+      );
+      final stopwatch = Stopwatch()..start();
+      final result = LibraryStore.matching(manySongs, 'exemplo 499');
+      stopwatch.stop();
+
+      expect(result.isNotEmpty, isTrue);
+      expect(
+        stopwatch.elapsedMilliseconds < 100,
+        isTrue,
+        reason: 'Busca em 5000 itens deve levar menos de 100ms',
+      );
     });
   });
 

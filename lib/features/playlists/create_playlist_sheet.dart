@@ -87,8 +87,7 @@ class _SheetBody extends StatelessWidget {
     final keyboard = MediaQuery.viewInsetsOf(context).bottom;
     // Reserva espaço pro teclado no cálculo da altura máxima, senão o sheet
     // encostaria atrás do teclado.
-    final maxHeight =
-        (MediaQuery.sizeOf(context).height - keyboard) * 0.88;
+    final maxHeight = (MediaQuery.sizeOf(context).height - keyboard) * 0.88;
 
     return Container(
       constraints: BoxConstraints(maxHeight: maxHeight),
@@ -134,7 +133,10 @@ class _SheetBody extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 5),
-                    _NameField(controller: nameController, onChanged: vm.setName),
+                    _NameField(
+                      controller: nameController,
+                      onChanged: vm.setName,
+                    ),
                     SizedBox(height: 20),
                     Text(
                       'ADICIONAR MÚSICAS · ${vm.pickCount} SELECIONADAS',
@@ -282,7 +284,9 @@ class _Checkbox extends StatelessWidget {
         shape: BoxShape.circle,
         color: picked ? context.colors.accent2_500 : Colors.transparent,
         border: Border.all(
-          color: picked ? context.colors.accent2_500 : context.colors.neutral400,
+          color: picked
+              ? context.colors.accent2_500
+              : context.colors.neutral400,
           width: 2,
         ),
       ),

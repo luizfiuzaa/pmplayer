@@ -19,24 +19,19 @@ class ScaleOnPress extends StatefulWidget {
   State<ScaleOnPress> createState() => _ScaleOnPressState();
 }
 
-class _ScaleOnPressState extends State<ScaleOnPress> with SingleTickerProviderStateMixin {
+class _ScaleOnPressState extends State<ScaleOnPress>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    );
+    _controller = AnimationController(vsync: this, duration: widget.duration);
     _scaleAnimation = Tween<double>(
       begin: 1.0,
       end: widget.scaleDownTo,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -77,10 +72,8 @@ class _ScaleOnPressState extends State<ScaleOnPress> with SingleTickerProviderSt
       onTapCancel: _onTapCancel,
       child: AnimatedBuilder(
         animation: _scaleAnimation,
-        builder: (context, child) => Transform.scale(
-          scale: _scaleAnimation.value,
-          child: child,
-        ),
+        builder: (context, child) =>
+            Transform.scale(scale: _scaleAnimation.value, child: child),
         child: widget.child,
       ),
     );

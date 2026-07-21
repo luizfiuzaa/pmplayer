@@ -20,7 +20,12 @@ class MusicGlyph extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox.square(
       dimension: size,
-      child: CustomPaint(painter: _MusicGlyphPainter(color ?? AppColors.light.accent2_700, strokeWidth)),
+      child: CustomPaint(
+        painter: _MusicGlyphPainter(
+          color ?? AppColors.light.accent2_700,
+          strokeWidth,
+        ),
+      ),
     );
   }
 }

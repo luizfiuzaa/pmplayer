@@ -33,14 +33,15 @@ class PlayerViewModel extends ChangeNotifier {
       _progress = prefs!.getInt('player_progress') ?? 0;
       _shuffle = prefs!.getBool('player_shuffle') ?? false;
       _repeat = prefs!.getBool('player_repeat') ?? false;
-      
+
       final savedBase = prefs!.getStringList('player_base');
       if (savedBase != null && savedBase.isNotEmpty) _base = savedBase;
-      
+
       final savedOrder = prefs!.getStringList('player_order');
       if (savedOrder != null && savedOrder.isNotEmpty) _order = savedOrder;
-      
-      _contextLabel = prefs!.getString('player_context') ?? 'Tocando da biblioteca';
+
+      _contextLabel =
+          prefs!.getString('player_context') ?? 'Tocando da biblioteca';
     }
 
     _positionSub = _engine.positionStream.listen(_onPosition);

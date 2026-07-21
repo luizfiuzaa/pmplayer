@@ -16,19 +16,31 @@ class LibraryStore extends ChangeNotifier {
        _favoriteIds = List.of(initial.favoriteIds),
        _playlists = List.of(initial.playlists) {
     _repository = repository;
+    _favoriteIdsSet = Set.of(_favoriteIds);
     _reindex();
   }
 
   late final LibraryRepository? _repository;
   final List<Song> _songs;
   final List<String> _favoriteIds;
+  late final Set<String> _favoriteIdsSet;
   final List<Playlist> _playlists;
   Map<String, Song> _byId = {};
 
   void _reindex() => _byId = {for (final s in _songs) s.id: s};
 
+  static final Map<int, String> _foldMap = {
+    for (final c in 'áàâãäÁÀÂÃÄ'.codeUnits) c: 'a',
+    for (final c in 'éèêëÉÈÊË'.codeUnits) c: 'e',
+    for (final c in 'íìîïÍÌÎÏ'.codeUnits) c: 'i',
+    for (final c in 'óòôõöÓÒÔÕÖ'.codeUnits) c: 'o',
+    for (final c in 'úùûüÚÙÛÜ'.codeUnits) c: 'u',
+    for (final c in 'çÇ'.codeUnits) c: 'c',
+    for (final c in 'ñÑ'.codeUnits) c: 'n',
+  };
+
   /// Filtra [songs] por título ou artista, ignorando maiúsculas e acentos.
-  /// Query vazia devolve a lista intacta. Função pura (fácil de testar).
+  /// Query vazia devolve a lista intacta. Função pura e otimizada de alta performance.
   static List<Song> matching(List<Song> songs, String query) {
     final q = _fold(query);
     if (q.isEmpty) return List.of(songs);
@@ -38,12 +50,16 @@ class LibraryStore extends ChangeNotifier {
   }
 
   static String _fold(String value) {
-    const from = 'áàâãäéèêëíìîïóòôõöúùûüçñ';
-    const to = 'aaaaaeeeeiiiiooooouuuucn';
+    if (value.isEmpty) return '';
     final buffer = StringBuffer();
-    for (final ch in value.toLowerCase().trim().split('')) {
-      final i = from.indexOf(ch);
-      buffer.write(i >= 0 ? to[i] : ch);
+    final lower = value.trim().toLowerCase();
+    for (final codeUnit in lower.codeUnits) {
+      final replacement = _foldMap[codeUnit];
+      if (replacement != null) {
+        buffer.write(replacement);
+      } else {
+        buffer.writeCharCode(codeUnit);
+      }
     }
     return buffer.toString();
   }
@@ -71,12 +87,19 @@ class LibraryStore extends ChangeNotifier {
 
   // ── Favoritas ──────────────────────────────────────────────────────────
   List<String> get favoriteIds => List.unmodifiable(_favoriteIds);
-  bool isFavorite(String id) => _favoriteIds.contains(id);
+  bool isFavorite(String id) => _favoriteIdsSet.contains(id);
   List<Song> get favoriteSongs => _favoriteIds.map((id) => _byId[id]!).toList();
 
   void toggleFavorite(String id) {
-    if (!_favoriteIds.remove(id)) _favoriteIds.add(id);
-    _repository?.setFavorite(id, _favoriteIds.contains(id));
+    if (_favoriteIdsSet.contains(id)) {
+      _favoriteIdsSet.remove(id);
+      _favoriteIds.remove(id);
+      _repository?.setFavorite(id, false);
+    } else {
+      _favoriteIdsSet.add(id);
+      _favoriteIds.add(id);
+      _repository?.setFavorite(id, true);
+    }
     notifyListeners();
   }
 

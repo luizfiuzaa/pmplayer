@@ -90,29 +90,31 @@ class _MarqueeTextState extends State<MarqueeText>
           softWrap: false,
         );
 
-        return SizedBox(
-          height: painter.height,
-          child: ClipRect(
-            child: AnimatedBuilder(
-              animation: _controller,
-              builder: (context, _) {
-                return Transform.translate(
-                  offset: Offset(-_controller.value * total, 0),
-                  child: OverflowBox(
-                    minWidth: 0,
-                    maxWidth: double.infinity,
-                    alignment: Alignment.centerLeft,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        item,
-                        SizedBox(width: widget.gap),
-                        item,
-                      ],
+        return RepaintBoundary(
+          child: SizedBox(
+            height: painter.height,
+            child: ClipRect(
+              child: AnimatedBuilder(
+                animation: _controller,
+                builder: (context, _) {
+                  return Transform.translate(
+                    offset: Offset(-_controller.value * total, 0),
+                    child: OverflowBox(
+                      minWidth: 0,
+                      maxWidth: double.infinity,
+                      alignment: Alignment.centerLeft,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          item,
+                          SizedBox(width: widget.gap),
+                          item,
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         );

@@ -31,7 +31,8 @@ class AppShell extends StatelessWidget {
         : navigation.screen;
 
     return PopScope(
-      canPop: navigation.screen == AppScreen.library && !navigation.createSheetOpen,
+      canPop:
+          navigation.screen == AppScreen.library && !navigation.createSheetOpen,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
         if (navigation.createSheetOpen) {
@@ -57,10 +58,7 @@ class AppShell extends StatelessWidget {
                   switchOutCurve: Curves.easeInCubic,
                   layoutBuilder: (currentChild, previousChildren) => Stack(
                     fit: StackFit.expand,
-                    children: [
-                      ...previousChildren,
-                      ?currentChild,
-                    ],
+                    children: [...previousChildren, ?currentChild],
                   ),
                   transitionBuilder: (child, animation) => FadeTransition(
                     opacity: animation,
@@ -101,13 +99,16 @@ class AppShell extends StatelessWidget {
                 duration: const Duration(milliseconds: 300),
                 transitionBuilder: (child, animation) {
                   return SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0, 1),
-                      end: Offset.zero,
-                    ).animate(CurvedAnimation(
-                      parent: animation,
-                      curve: Curves.easeOutCubic,
-                    )),
+                    position:
+                        Tween<Offset>(
+                          begin: const Offset(0, 1),
+                          end: Offset.zero,
+                        ).animate(
+                          CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeOutCubic,
+                          ),
+                        ),
                     child: child,
                   );
                 },
@@ -121,13 +122,16 @@ class AppShell extends StatelessWidget {
                 duration: const Duration(milliseconds: 300),
                 transitionBuilder: (child, animation) {
                   return SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0, 1),
-                      end: Offset.zero,
-                    ).animate(CurvedAnimation(
-                      parent: animation,
-                      curve: Curves.easeOutCubic,
-                    )),
+                    position:
+                        Tween<Offset>(
+                          begin: const Offset(0, 1),
+                          end: Offset.zero,
+                        ).animate(
+                          CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeOutCubic,
+                          ),
+                        ),
                     child: child,
                   );
                 },
@@ -219,7 +223,9 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = active ? context.colors.accent2_700 : context.colors.neutral600;
+    final color = active
+        ? context.colors.accent2_700
+        : context.colors.neutral600;
     return Expanded(
       child: InkResponse(
         onTap: onTap,

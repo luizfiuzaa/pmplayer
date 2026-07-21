@@ -7,7 +7,7 @@ class UiUtils {
   static void toggleFavorite(BuildContext context, String songId) {
     final library = context.read<LibraryStore>();
     library.toggleFavorite(songId);
-    
+
     if (library.isFavorite(songId)) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(

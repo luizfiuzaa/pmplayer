@@ -210,10 +210,8 @@ class LyricsFullView extends StatefulWidget {
       barrierLabel: 'Letra',
       transitionDuration: const Duration(milliseconds: 300),
       pageBuilder: (_, _, _) => LyricsFullView(song: song),
-      transitionBuilder: (_, animation, _, child) => FadeTransition(
-        opacity: animation,
-        child: child,
-      ),
+      transitionBuilder: (_, animation, _, child) =>
+          FadeTransition(opacity: animation, child: child),
     );
   }
 
@@ -224,8 +222,10 @@ class LyricsFullView extends StatefulWidget {
 class _LyricsFullViewState extends State<LyricsFullView> {
   late final Lyrics _lyrics = Lyrics.parse(widget.song.lyrics);
   final ScrollController _scroll = ScrollController();
-  late final List<GlobalKey> _keys =
-      List.generate(_lyrics.lines.length, (_) => GlobalKey());
+  late final List<GlobalKey> _keys = List.generate(
+    _lyrics.lines.length,
+    (_) => GlobalKey(),
+  );
   int _activeIndex = -1;
 
   @override
@@ -259,8 +259,9 @@ class _LyricsFullViewState extends State<LyricsFullView> {
 
     final int active;
     if (_lyrics.synced) {
-      final position =
-          context.select<PlayerViewModel, Duration>((p) => p.position);
+      final position = context.select<PlayerViewModel, Duration>(
+        (p) => p.position,
+      );
       active = _lyrics.activeIndex(position);
       _syncTo(active);
     } else {
@@ -338,9 +339,9 @@ class _LyricsFullViewState extends State<LyricsFullView> {
                             // Tocar em uma linha sincronizada pula para o seu
                             // instante na música.
                             final onTap = line.time != null
-                                ? () => context
-                                      .read<PlayerViewModel>()
-                                      .seekTo(line.time!)
+                                ? () => context.read<PlayerViewModel>().seekTo(
+                                    line.time!,
+                                  )
                                 : null;
                             return InkWell(
                               key: _keys[i],
@@ -364,7 +365,9 @@ class _LyricsFullViewState extends State<LyricsFullView> {
                                     height: 1.5,
                                     color: dim
                                         ? context.colors.alpha(
-                                            context.colors.text, 0.4)
+                                            context.colors.text,
+                                            0.4,
+                                          )
                                         : context.colors.text,
                                   ),
                                   child: Text(line.text),

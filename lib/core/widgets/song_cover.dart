@@ -35,7 +35,7 @@ class SongCover extends StatelessWidget {
       shadow: shadow,
       child: song.isGeneric
           ? MusicGlyph(
-              size: glyphSize, 
+              size: glyphSize,
               color: glyphColor ?? AppColors.light.accent2_700,
             )
           : null,

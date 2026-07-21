@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../core/state/library_store.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
-import '../../core/widgets/skeleton.dart';
 import '../../core/widgets/track_tile.dart';
 import '../player/player_view_model.dart';
 import 'import/music_importer.dart';
@@ -51,7 +50,10 @@ class _LibraryViewState extends State<LibraryView> {
   @override
   Widget build(BuildContext context) {
     final library = context.watch<LibraryStore>();
-    final player = context.watch<PlayerViewModel>();
+    final currentId = context.select<PlayerViewModel, String?>(
+      (p) => p.currentId,
+    );
+    final player = context.read<PlayerViewModel>();
     final songs = library.songs;
     final query = _query.trim();
     final searching = query.isNotEmpty;
@@ -112,20 +114,37 @@ class _LibraryViewState extends State<LibraryView> {
 
     final content = <Widget>[
       if (_importing) ...[
-        Text('Adicionando músicas…', style: AppTypography.headingStyle(size: 22)),
+        Text(
+          'Adicionando músicas…',
+          style: AppTypography.headingStyle(size: 22),
+        ),
         SizedBox(height: 10),
         // Faixas já lidas aparecem progressivamente; o skeleton indica o resto.
         for (final song in songs)
           TrackTile(
             song: song,
-            isCurrent: song.id == player.currentId,
+            isCurrent: song.id == currentId,
             isFavorite: library.isFavorite(song.id),
             showDuration: true,
             onTap: () => player.play(song.id),
             onToggleFavorite: () => UiUtils.toggleFavorite(context, song.id),
           ),
         if (songs.isNotEmpty) SizedBox(height: 8),
-        const TrackListSkeleton(count: 3),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 32),
+          child: Center(
+            child: SizedBox(
+              width: 32,
+              height: 32,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  context.colors.accent2_700,
+                ),
+              ),
+            ),
+          ),
+        ),
       ] else if (songs.isEmpty)
         _EmptyLibrary(onAdd: _import)
       else if (searching) ...[
@@ -149,19 +168,25 @@ class _LibraryViewState extends State<LibraryView> {
           for (final song in results)
             TrackTile(
               song: song,
-              isCurrent: song.id == player.currentId,
+              isCurrent: song.id == currentId,
               isFavorite: library.isFavorite(song.id),
               showDuration: true,
               onTap: () => player.play(song.id),
               onToggleFavorite: () => UiUtils.toggleFavorite(context, song.id),
             ),
       ] else ...[
-        _ShuffleAllButton(count: songs.length, onTap: () => player.shuffleAll()),
+        _ShuffleAllButton(
+          count: songs.length,
+          onTap: () => player.shuffleAll(),
+        ),
         SizedBox(height: 26),
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text('Todas as faixas', style: AppTypography.headingStyle(size: 22)),
+            Text(
+              'Todas as faixas',
+              style: AppTypography.headingStyle(size: 22),
+            ),
             SizedBox(width: 8),
             Text(
               '${songs.length}',
@@ -178,7 +203,7 @@ class _LibraryViewState extends State<LibraryView> {
         for (final song in songs)
           TrackTile(
             song: song,
-            isCurrent: song.id == player.currentId,
+            isCurrent: song.id == currentId,
             isFavorite: library.isFavorite(song.id),
             showDuration: true,
             onTap: () => player.play(song.id),
@@ -290,7 +315,11 @@ class _SearchField extends StatelessWidget {
           ),
           if (controller.text.isNotEmpty)
             IconButton(
-              icon: Icon(Icons.close, size: 18, color: context.colors.neutral600),
+              icon: Icon(
+                Icons.close,
+                size: 18,
+                color: context.colors.neutral600,
+              ),
               splashRadius: 18,
               onPressed: () {
                 controller.clear();

@@ -17,10 +17,7 @@ Widget _host(Song song) => MaterialApp(
   theme: AppTheme.build(AppColors.light, Brightness.light),
   home: Scaffold(
     body: Center(
-      child: LyricsArtwork(
-        song: song,
-        front: const Text('CAPA'),
-      ),
+      child: LyricsArtwork(song: song, front: const Text('CAPA')),
     ),
   ),
 );

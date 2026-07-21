@@ -17,7 +17,10 @@ class FavoritesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final library = context.watch<LibraryStore>();
-    final player = context.watch<PlayerViewModel>();
+    final currentId = context.select<PlayerViewModel, String?>(
+      (p) => p.currentId,
+    );
+    final player = context.read<PlayerViewModel>();
     final favorites = library.favoriteSongs;
 
     return ListView(
@@ -69,7 +72,7 @@ class FavoritesView extends StatelessWidget {
           for (final song in favorites)
             TrackTile(
               song: song,
-              isCurrent: song.id == player.currentId,
+              isCurrent: song.id == currentId,
               isFavorite: library.isFavorite(song.id),
               onTap: () => player.play(song.id),
               onToggleFavorite: () => UiUtils.toggleFavorite(context, song.id),

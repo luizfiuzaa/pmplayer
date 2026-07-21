@@ -63,7 +63,9 @@ class AddToPlaylistSheet extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
                 child: Text(
                   'Você ainda não tem playlists. Crie uma na aba Playlists.',
-                  style: AppTypography.bodyStyle(color: context.colors.neutral600),
+                  style: AppTypography.bodyStyle(
+                    color: context.colors.neutral600,
+                  ),
                 ),
               )
             else
@@ -174,7 +176,9 @@ class _Checkbox extends StatelessWidget {
         shape: BoxShape.circle,
         color: checked ? context.colors.accent2_500 : Colors.transparent,
         border: Border.all(
-          color: checked ? context.colors.accent2_500 : context.colors.neutral400,
+          color: checked
+              ? context.colors.accent2_500
+              : context.colors.neutral400,
           width: 2,
         ),
       ),

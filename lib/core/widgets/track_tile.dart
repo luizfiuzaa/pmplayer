@@ -63,7 +63,9 @@ class TrackTile extends StatelessWidget {
                       size: 15,
                       weight: FontWeight.w700,
                       height: 1.2,
-                      color: isCurrent ? context.colors.accent2_700 : context.colors.text,
+                      color: isCurrent
+                          ? context.colors.accent2_700
+                          : context.colors.text,
                     ),
                   ),
                   Text(

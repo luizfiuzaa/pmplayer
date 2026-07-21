@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:pmplayer/core/data/library_repository.dart';
-import 'package:pmplayer/core/widgets/skeleton.dart';
 import 'package:pmplayer/features/player/lyrics_artwork.dart';
 import 'package:pmplayer/features/player/player_view_model.dart';
 import 'package:pmplayer/core/data/sample_music_repository.dart';
@@ -68,10 +67,7 @@ class StreamImporter implements MusicImporter {
 Song _song(String id) =>
     Song(id: id, title: id, artist: 'x', durationSeconds: 1, uri: id);
 
-PmPlayerApp buildApp({
-  LibrarySnapshot? initial,
-  MusicImporter? importer,
-}) {
+PmPlayerApp buildApp({LibrarySnapshot? initial, MusicImporter? importer}) {
   return PmPlayerApp(
     initial: initial ?? SampleMusicRepository().snapshot(),
     engine: InertAudioEngine(),
@@ -189,38 +185,39 @@ void main() {
     expect(find.text('Todas as faixas'), findsOneWidget);
   });
 
-  testWidgets('mostra skeleton de carregamento enquanto adiciona músicas', (
-    tester,
-  ) async {
-    final completer = Completer<List<Song>>();
-    await tester.pumpWidget(
-      buildApp(
-        initial: const LibrarySnapshot(),
-        importer: AsyncImporter(completer.future),
-      ),
-    );
+  testWidgets(
+    'mostra indicador circular de carregamento enquanto adiciona músicas',
+    (tester) async {
+      final completer = Completer<List<Song>>();
+      await tester.pumpWidget(
+        buildApp(
+          initial: const LibrarySnapshot(),
+          importer: AsyncImporter(completer.future),
+        ),
+      );
 
-    await tester.tap(find.text('Adicionar músicas'));
-    await tester.pump(); // setState importing = true
+      await tester.tap(find.text('Adicionar músicas'));
+      await tester.pump(); // setState importing = true
 
-    expect(find.text('Adicionando músicas…'), findsOneWidget);
-    expect(find.byType(TrackListSkeleton), findsOneWidget);
+      expect(find.text('Adicionando músicas…'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
-    completer.complete(const [
-      Song(
-        id: '/m/A.mp3',
-        title: 'Faixa A',
-        artist: 'x',
-        durationSeconds: 1,
-        uri: '/m/A.mp3',
-      ),
-    ]);
-    await tester.pump(); // resolve a future
-    await tester.pump(); // setState importing = false
+      completer.complete(const [
+        Song(
+          id: '/m/A.mp3',
+          title: 'Faixa A',
+          artist: 'x',
+          durationSeconds: 1,
+          uri: '/m/A.mp3',
+        ),
+      ]);
+      await tester.pump(); // resolve a future
+      await tester.pump(); // setState importing = false
 
-    expect(find.byType(TrackListSkeleton), findsNothing);
-    expect(find.text('Faixa A'), findsWidgets);
-  });
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.text('Faixa A'), findsWidgets);
+    },
+  );
 
   testWidgets('adiciona as faixas em lotes, progressivamente', (tester) async {
     final controller = StreamController<List<Song>>();
@@ -233,13 +230,13 @@ void main() {
 
     await tester.tap(find.text('Adicionar músicas'));
     await tester.pump();
-    expect(find.byType(TrackListSkeleton), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
     controller.add([_song('Lote1')]);
     await tester.pump();
-    // Já visível durante o carregamento (com skeleton ainda presente).
+    // Já visível durante o carregamento (com o indicador circular ainda presente).
     expect(find.text('Lote1'), findsWidgets);
-    expect(find.byType(TrackListSkeleton), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
     controller.add([_song('Lote2')]);
     await tester.pump();
@@ -249,7 +246,7 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect(find.byType(TrackListSkeleton), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
     expect(find.text('Lote1'), findsWidgets);
     expect(find.text('Lote2'), findsWidgets);
   });
