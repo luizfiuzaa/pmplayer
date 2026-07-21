@@ -77,6 +77,15 @@ class $SongsTable extends Songs with TableInfo<$SongsTable, SongRow> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _lyricsMeta = const VerificationMeta('lyrics');
+  @override
+  late final GeneratedColumn<String> lyrics = GeneratedColumn<String>(
+    'lyrics',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _positionMeta = const VerificationMeta(
     'position',
   );
@@ -97,6 +106,7 @@ class $SongsTable extends Songs with TableInfo<$SongsTable, SongRow> {
     uri,
     paletteJson,
     coverPath,
+    lyrics,
     position,
   ];
   @override
@@ -164,6 +174,12 @@ class $SongsTable extends Songs with TableInfo<$SongsTable, SongRow> {
         coverPath.isAcceptableOrUnknown(data['cover_path']!, _coverPathMeta),
       );
     }
+    if (data.containsKey('lyrics')) {
+      context.handle(
+        _lyricsMeta,
+        lyrics.isAcceptableOrUnknown(data['lyrics']!, _lyricsMeta),
+      );
+    }
     if (data.containsKey('position')) {
       context.handle(
         _positionMeta,
@@ -209,6 +225,10 @@ class $SongsTable extends Songs with TableInfo<$SongsTable, SongRow> {
         DriftSqlType.string,
         data['${effectivePrefix}cover_path'],
       ),
+      lyrics: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}lyrics'],
+      ),
       position: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}position'],
@@ -234,6 +254,9 @@ class SongRow extends DataClass implements Insertable<SongRow> {
 
   /// Caminho da imagem de capa (arte embutida extraída dos metadados).
   final String? coverPath;
+
+  /// Letra (não sincronizada) lida dos metadados embutidos.
+  final String? lyrics;
   final int position;
   const SongRow({
     required this.id,
@@ -243,6 +266,7 @@ class SongRow extends DataClass implements Insertable<SongRow> {
     this.uri,
     this.paletteJson,
     this.coverPath,
+    this.lyrics,
     required this.position,
   });
   @override
@@ -261,6 +285,9 @@ class SongRow extends DataClass implements Insertable<SongRow> {
     if (!nullToAbsent || coverPath != null) {
       map['cover_path'] = Variable<String>(coverPath);
     }
+    if (!nullToAbsent || lyrics != null) {
+      map['lyrics'] = Variable<String>(lyrics);
+    }
     map['position'] = Variable<int>(position);
     return map;
   }
@@ -278,6 +305,9 @@ class SongRow extends DataClass implements Insertable<SongRow> {
       coverPath: coverPath == null && nullToAbsent
           ? const Value.absent()
           : Value(coverPath),
+      lyrics: lyrics == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lyrics),
       position: Value(position),
     );
   }
@@ -295,6 +325,7 @@ class SongRow extends DataClass implements Insertable<SongRow> {
       uri: serializer.fromJson<String?>(json['uri']),
       paletteJson: serializer.fromJson<String?>(json['paletteJson']),
       coverPath: serializer.fromJson<String?>(json['coverPath']),
+      lyrics: serializer.fromJson<String?>(json['lyrics']),
       position: serializer.fromJson<int>(json['position']),
     );
   }
@@ -309,6 +340,7 @@ class SongRow extends DataClass implements Insertable<SongRow> {
       'uri': serializer.toJson<String?>(uri),
       'paletteJson': serializer.toJson<String?>(paletteJson),
       'coverPath': serializer.toJson<String?>(coverPath),
+      'lyrics': serializer.toJson<String?>(lyrics),
       'position': serializer.toJson<int>(position),
     };
   }
@@ -321,6 +353,7 @@ class SongRow extends DataClass implements Insertable<SongRow> {
     Value<String?> uri = const Value.absent(),
     Value<String?> paletteJson = const Value.absent(),
     Value<String?> coverPath = const Value.absent(),
+    Value<String?> lyrics = const Value.absent(),
     int? position,
   }) => SongRow(
     id: id ?? this.id,
@@ -330,6 +363,7 @@ class SongRow extends DataClass implements Insertable<SongRow> {
     uri: uri.present ? uri.value : this.uri,
     paletteJson: paletteJson.present ? paletteJson.value : this.paletteJson,
     coverPath: coverPath.present ? coverPath.value : this.coverPath,
+    lyrics: lyrics.present ? lyrics.value : this.lyrics,
     position: position ?? this.position,
   );
   SongRow copyWithCompanion(SongsCompanion data) {
@@ -345,6 +379,7 @@ class SongRow extends DataClass implements Insertable<SongRow> {
           ? data.paletteJson.value
           : this.paletteJson,
       coverPath: data.coverPath.present ? data.coverPath.value : this.coverPath,
+      lyrics: data.lyrics.present ? data.lyrics.value : this.lyrics,
       position: data.position.present ? data.position.value : this.position,
     );
   }
@@ -359,6 +394,7 @@ class SongRow extends DataClass implements Insertable<SongRow> {
           ..write('uri: $uri, ')
           ..write('paletteJson: $paletteJson, ')
           ..write('coverPath: $coverPath, ')
+          ..write('lyrics: $lyrics, ')
           ..write('position: $position')
           ..write(')'))
         .toString();
@@ -373,6 +409,7 @@ class SongRow extends DataClass implements Insertable<SongRow> {
     uri,
     paletteJson,
     coverPath,
+    lyrics,
     position,
   );
   @override
@@ -386,6 +423,7 @@ class SongRow extends DataClass implements Insertable<SongRow> {
           other.uri == this.uri &&
           other.paletteJson == this.paletteJson &&
           other.coverPath == this.coverPath &&
+          other.lyrics == this.lyrics &&
           other.position == this.position);
 }
 
@@ -397,6 +435,7 @@ class SongsCompanion extends UpdateCompanion<SongRow> {
   final Value<String?> uri;
   final Value<String?> paletteJson;
   final Value<String?> coverPath;
+  final Value<String?> lyrics;
   final Value<int> position;
   final Value<int> rowid;
   const SongsCompanion({
@@ -407,6 +446,7 @@ class SongsCompanion extends UpdateCompanion<SongRow> {
     this.uri = const Value.absent(),
     this.paletteJson = const Value.absent(),
     this.coverPath = const Value.absent(),
+    this.lyrics = const Value.absent(),
     this.position = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -418,6 +458,7 @@ class SongsCompanion extends UpdateCompanion<SongRow> {
     this.uri = const Value.absent(),
     this.paletteJson = const Value.absent(),
     this.coverPath = const Value.absent(),
+    this.lyrics = const Value.absent(),
     required int position,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -433,6 +474,7 @@ class SongsCompanion extends UpdateCompanion<SongRow> {
     Expression<String>? uri,
     Expression<String>? paletteJson,
     Expression<String>? coverPath,
+    Expression<String>? lyrics,
     Expression<int>? position,
     Expression<int>? rowid,
   }) {
@@ -444,6 +486,7 @@ class SongsCompanion extends UpdateCompanion<SongRow> {
       if (uri != null) 'uri': uri,
       if (paletteJson != null) 'palette_json': paletteJson,
       if (coverPath != null) 'cover_path': coverPath,
+      if (lyrics != null) 'lyrics': lyrics,
       if (position != null) 'position': position,
       if (rowid != null) 'rowid': rowid,
     });
@@ -457,6 +500,7 @@ class SongsCompanion extends UpdateCompanion<SongRow> {
     Value<String?>? uri,
     Value<String?>? paletteJson,
     Value<String?>? coverPath,
+    Value<String?>? lyrics,
     Value<int>? position,
     Value<int>? rowid,
   }) {
@@ -468,6 +512,7 @@ class SongsCompanion extends UpdateCompanion<SongRow> {
       uri: uri ?? this.uri,
       paletteJson: paletteJson ?? this.paletteJson,
       coverPath: coverPath ?? this.coverPath,
+      lyrics: lyrics ?? this.lyrics,
       position: position ?? this.position,
       rowid: rowid ?? this.rowid,
     );
@@ -497,6 +542,9 @@ class SongsCompanion extends UpdateCompanion<SongRow> {
     if (coverPath.present) {
       map['cover_path'] = Variable<String>(coverPath.value);
     }
+    if (lyrics.present) {
+      map['lyrics'] = Variable<String>(lyrics.value);
+    }
     if (position.present) {
       map['position'] = Variable<int>(position.value);
     }
@@ -516,6 +564,7 @@ class SongsCompanion extends UpdateCompanion<SongRow> {
           ..write('uri: $uri, ')
           ..write('paletteJson: $paletteJson, ')
           ..write('coverPath: $coverPath, ')
+          ..write('lyrics: $lyrics, ')
           ..write('position: $position, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -1186,6 +1235,7 @@ typedef $$SongsTableCreateCompanionBuilder =
       Value<String?> uri,
       Value<String?> paletteJson,
       Value<String?> coverPath,
+      Value<String?> lyrics,
       required int position,
       Value<int> rowid,
     });
@@ -1198,6 +1248,7 @@ typedef $$SongsTableUpdateCompanionBuilder =
       Value<String?> uri,
       Value<String?> paletteJson,
       Value<String?> coverPath,
+      Value<String?> lyrics,
       Value<int> position,
       Value<int> rowid,
     });
@@ -1242,6 +1293,11 @@ class $$SongsTableFilterComposer extends Composer<_$AppDatabase, $SongsTable> {
 
   ColumnFilters<String> get coverPath => $composableBuilder(
     column: $table.coverPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lyrics => $composableBuilder(
+    column: $table.lyrics,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1295,6 +1351,11 @@ class $$SongsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get lyrics => $composableBuilder(
+    column: $table.lyrics,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get position => $composableBuilder(
     column: $table.position,
     builder: (column) => ColumnOrderings(column),
@@ -1335,6 +1396,9 @@ class $$SongsTableAnnotationComposer
   GeneratedColumn<String> get coverPath =>
       $composableBuilder(column: $table.coverPath, builder: (column) => column);
 
+  GeneratedColumn<String> get lyrics =>
+      $composableBuilder(column: $table.lyrics, builder: (column) => column);
+
   GeneratedColumn<int> get position =>
       $composableBuilder(column: $table.position, builder: (column) => column);
 }
@@ -1374,6 +1438,7 @@ class $$SongsTableTableManager
                 Value<String?> uri = const Value.absent(),
                 Value<String?> paletteJson = const Value.absent(),
                 Value<String?> coverPath = const Value.absent(),
+                Value<String?> lyrics = const Value.absent(),
                 Value<int> position = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SongsCompanion(
@@ -1384,6 +1449,7 @@ class $$SongsTableTableManager
                 uri: uri,
                 paletteJson: paletteJson,
                 coverPath: coverPath,
+                lyrics: lyrics,
                 position: position,
                 rowid: rowid,
               ),
@@ -1396,6 +1462,7 @@ class $$SongsTableTableManager
                 Value<String?> uri = const Value.absent(),
                 Value<String?> paletteJson = const Value.absent(),
                 Value<String?> coverPath = const Value.absent(),
+                Value<String?> lyrics = const Value.absent(),
                 required int position,
                 Value<int> rowid = const Value.absent(),
               }) => SongsCompanion.insert(
@@ -1406,6 +1473,7 @@ class $$SongsTableTableManager
                 uri: uri,
                 paletteJson: paletteJson,
                 coverPath: coverPath,
+                lyrics: lyrics,
                 position: position,
                 rowid: rowid,
               ),

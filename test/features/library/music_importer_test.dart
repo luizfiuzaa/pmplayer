@@ -1,3 +1,4 @@
+import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pmplayer/features/library/import/music_importer.dart';
 
@@ -30,5 +31,29 @@ void main() {
     expect(song.artist, 'Artista desconhecido');
     expect(song.durationSeconds, 0);
     expect(song.coverPath, isNull);
+  });
+
+  test('guarda a letra dos metadados quando presente', () {
+    final song = songFromMetadata(
+      path: '/m/x.mp3',
+      lyrics: '  Linha 1\nLinha 2  ',
+    );
+    expect(song.hasLyrics, isTrue);
+    expect(song.lyrics, 'Linha 1\nLinha 2');
+  });
+
+  test('letra vazia vira null', () {
+    final song = songFromMetadata(path: '/m/x.mp3', lyrics: '   ');
+    expect(song.lyrics, isNull);
+    expect(song.hasLyrics, isFalse);
+  });
+
+  test('repassa a paleta (cor dominante) quando fornecida', () {
+    final song = songFromMetadata(
+      path: '/m/x.mp3',
+      palette: const [Color(0xFF112233), Color(0xFF445566)],
+    );
+    expect(song.palette, hasLength(2));
+    expect(song.isGeneric, isFalse);
   });
 }

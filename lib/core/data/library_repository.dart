@@ -22,4 +22,5 @@ abstract interface class LibraryRepository {
   Future<void> setFavorite(String songId, bool favorite);
   Future<void> addPlaylist(Playlist playlist);
   Future<void> setPlaylistCover(String playlistId, String? coverPath);
+  Future<void> setPlaylistSongs(String playlistId, List<String> songIds);
 }

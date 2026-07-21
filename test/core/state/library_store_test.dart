@@ -25,6 +25,10 @@ class RecordingRepository implements LibraryRepository {
   @override
   Future<void> setPlaylistCover(String playlistId, String? coverPath) async =>
       playlistCovers[playlistId] = coverPath;
+  final Map<String, List<String>> playlistSongs = {};
+  @override
+  Future<void> setPlaylistSongs(String playlistId, List<String> songIds) async =>
+      playlistSongs[playlistId] = songIds;
 }
 
 LibraryStore buildStore([LibraryRepository? repo]) =>
@@ -57,6 +61,38 @@ void main() {
     });
   });
 
+  group('busca (matching)', () {
+    final songs = [
+      const Song(id: 'a', title: 'Maré Cheia', artist: 'João Silva', durationSeconds: 1),
+      const Song(id: 'b', title: 'Terra Vermelha', artist: 'Ana', durationSeconds: 1),
+      const Song(id: 'c', title: 'Sol', artist: 'JOÃO Pereira', durationSeconds: 1),
+    ];
+
+    test('query vazia devolve tudo', () {
+      expect(LibraryStore.matching(songs, '').length, 3);
+      expect(LibraryStore.matching(songs, '   ').length, 3);
+    });
+
+    test('casa por título, ignorando caixa', () {
+      final r = LibraryStore.matching(songs, 'TERRA');
+      expect(r.map((s) => s.id), ['b']);
+    });
+
+    test('casa por artista, ignorando acento', () {
+      final r = LibraryStore.matching(songs, 'joao');
+      expect(r.map((s) => s.id), ['a', 'c']);
+    });
+
+    test('casa acento na query contra texto sem acento e vice-versa', () {
+      final r = LibraryStore.matching(songs, 'maré');
+      expect(r.map((s) => s.id), ['a']);
+    });
+
+    test('sem correspondência devolve vazio', () {
+      expect(LibraryStore.matching(songs, 'zzz'), isEmpty);
+    });
+  });
+
   group('playlists', () {
     test('criar playlist anexa e persiste', () {
       final repo = RecordingRepository();
@@ -64,6 +100,38 @@ void main() {
       store.createPlaylist('Nova', ['s2', 's3']);
       expect(store.playlists.last.name, 'Nova');
       expect(repo.addedPlaylists.last.name, 'Nova');
+    });
+
+    test('playlistHasSong reflete o conteúdo', () {
+      final store = buildStore();
+      final p = store.playlists.first; // p1 = [s6, s4, s1, s10]
+      expect(store.playlistHasSong(p.id, 's4'), isTrue);
+      expect(store.playlistHasSong(p.id, 's2'), isFalse);
+    });
+
+    test('toggle adiciona faixa ausente, no fim, e persiste', () {
+      final repo = RecordingRepository();
+      final store = buildStore(repo);
+      final id = store.playlists.first.id;
+      store.toggleSongInPlaylist(id, 's2');
+      expect(store.playlistHasSong(id, 's2'), isTrue);
+      expect(store.playlistById(id)!.songIds.last, 's2');
+      expect(repo.playlistSongs[id]!.last, 's2');
+    });
+
+    test('toggle remove faixa presente e persiste', () {
+      final repo = RecordingRepository();
+      final store = buildStore(repo);
+      final id = store.playlists.first.id;
+      store.toggleSongInPlaylist(id, 's4');
+      expect(store.playlistHasSong(id, 's4'), isFalse);
+      expect(repo.playlistSongs[id], isNot(contains('s4')));
+    });
+
+    test('toggle em playlist inexistente não quebra', () {
+      final store = buildStore();
+      store.toggleSongInPlaylist('nao-existe', 's1');
+      expect(store.playlistById('nao-existe'), isNull);
     });
   });
 

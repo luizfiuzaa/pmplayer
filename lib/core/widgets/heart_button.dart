@@ -10,11 +10,16 @@ class HeartButton extends StatelessWidget {
     required this.isFavorite,
     required this.onPressed,
     this.size = 19,
+    this.unselectedColor,
   });
 
   final bool isFavorite;
   final VoidCallback onPressed;
   final double size;
+
+  /// Cor do coração quando não favoritado (para contraste sobre fundos
+  /// coloridos). `null` = neutro do tema.
+  final Color? unselectedColor;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +31,9 @@ class HeartButton extends StatelessWidget {
         child: Icon(
           isFavorite ? Icons.favorite : Icons.favorite_border,
           size: size,
-          color: isFavorite ? context.colors.accent : context.colors.neutral500,
+          color: isFavorite
+              ? context.colors.accent
+              : (unselectedColor ?? context.colors.neutral500),
         ),
       ),
     );

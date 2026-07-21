@@ -7,9 +7,12 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_shadows.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/widgets/cover_artwork.dart';
+import '../../core/widgets/marquee_text.dart';
 import '../../core/widgets/music_glyph.dart';
 import '../../core/widgets/scale_on_press.dart';
 import '../navigation/navigation_controller.dart';
+import '../playlists/add_to_playlist_sheet.dart';
+import 'lyrics_artwork.dart';
 import 'player_view_model.dart';
 import '../../core/utils/ui_utils.dart';
 
@@ -46,6 +49,7 @@ class NowPlayingView extends StatelessWidget {
               _TopBar(
                 contextLabel: player.contextLabel,
                 onMinimize: navigation.minimize,
+                onMore: () => AddToPlaylistSheet.show(context, song.id),
               ),
               SizedBox(height: 24),
               Expanded(
@@ -55,7 +59,10 @@ class NowPlayingView extends StatelessWidget {
                   switchOutCurve: Curves.easeInCubic,
                   child: Center(
                     key: ValueKey(song.id),
-                    child: _Artwork(song: song, spinning: player.isPlaying),
+                    child: LyricsArtwork(
+                      song: song,
+                      front: _Artwork(song: song, spinning: player.isPlaying),
+                    ),
                   ),
                 ),
               ),
@@ -67,6 +74,7 @@ class NowPlayingView extends StatelessWidget {
                 child: _TitleRow(
                   key: ValueKey(song.id),
                   song: song,
+                  playing: player.isPlaying,
                   isFavorite: library.isFavorite(song.id),
                   onToggleFavorite: () => UiUtils.toggleFavorite(context, song.id),
                 ),
@@ -74,9 +82,10 @@ class NowPlayingView extends StatelessWidget {
               SizedBox(height: 22),
               _ProgressBar(
                 fraction: player.progressFraction,
-                currentLabel: Song.formatSeconds(player.progressSeconds),
+                durationSeconds: song.durationSeconds,
                 durationLabel: song.durationLabel,
-                onSeek: player.seekToFraction,
+                onScrubStart: player.beginScrub,
+                onScrubEnd: player.endScrub,
               ),
               SizedBox(height: 14),
               _Controls(player: player),
@@ -89,10 +98,15 @@ class NowPlayingView extends StatelessWidget {
 }
 
 class _TopBar extends StatelessWidget {
-  const _TopBar({required this.contextLabel, required this.onMinimize});
+  const _TopBar({
+    required this.contextLabel,
+    required this.onMinimize,
+    required this.onMore,
+  });
 
   final String contextLabel;
   final VoidCallback onMinimize;
+  final VoidCallback onMore;
 
   @override
   Widget build(BuildContext context) {
@@ -122,9 +136,12 @@ class _TopBar extends StatelessWidget {
             ),
           ),
         ),
-        Padding(
-          padding: EdgeInsets.all(6),
-          child: Icon(Icons.more_horiz, size: 24, color: context.colors.text),
+        ScaleOnPress(
+          onTap: onMore,
+          child: Padding(
+            padding: const EdgeInsets.all(6),
+            child: Icon(Icons.more_horiz, size: 24, color: context.colors.text),
+          ),
         ),
       ],
     );
@@ -139,18 +156,12 @@ class _Artwork extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 300),
-      child: AspectRatio(
-        aspectRatio: 1,
-        child: CoverArtwork(
-          palette: song.palette,
-          imagePath: song.coverPath,
-          radius: 32,
-          shadow: AppShadows.lg,
-          child: song.isGeneric ? _SpinningDisc(spinning: spinning) : null,
-        ),
-      ),
+    return CoverArtwork(
+      palette: song.palette,
+      imagePath: song.coverPath,
+      radius: 32,
+      shadow: AppShadows.lg,
+      child: song.isGeneric ? _SpinningDisc(spinning: spinning) : null,
     );
   }
 }
@@ -219,11 +230,13 @@ class _TitleRow extends StatelessWidget {
   const _TitleRow({
     super.key,
     required this.song,
+    required this.playing,
     required this.isFavorite,
     required this.onToggleFavorite,
   });
 
   final Song song;
+  final bool playing;
   final bool isFavorite;
   final VoidCallback onToggleFavorite;
 
@@ -237,10 +250,9 @@ class _TitleRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                song.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              MarqueeText(
+                text: song.title,
+                enabled: playing,
                 style: AppTypography.headingStyle(size: 29, height: 1.08),
               ),
               SizedBox(height: 2),
@@ -273,31 +285,68 @@ class _TitleRow extends StatelessWidget {
   }
 }
 
-class _ProgressBar extends StatelessWidget {
+/// Barra de progresso com arrasto fluido: durante o gesto o polegar segue o
+/// dedo localmente (sem reconstruir a tela toda nem falar com o engine a cada
+/// frame). O áudio pausa em [onScrubStart] e retoma/posiciona em [onScrubEnd].
+class _ProgressBar extends StatefulWidget {
   const _ProgressBar({
     required this.fraction,
-    required this.currentLabel,
+    required this.durationSeconds,
     required this.durationLabel,
-    required this.onSeek,
+    required this.onScrubStart,
+    required this.onScrubEnd,
   });
 
   final double fraction;
-  final String currentLabel;
+  final int durationSeconds;
   final String durationLabel;
-  final ValueChanged<double> onSeek;
+  final VoidCallback onScrubStart;
+  final ValueChanged<double> onScrubEnd;
+
+  @override
+  State<_ProgressBar> createState() => _ProgressBarState();
+}
+
+class _ProgressBarState extends State<_ProgressBar> {
+  double? _dragFraction;
+
+  double get _effectiveFraction => _dragFraction ?? widget.fraction;
+
+  void _start(double fraction) {
+    widget.onScrubStart();
+    setState(() => _dragFraction = fraction.clamp(0.0, 1.0));
+  }
+
+  void _move(double fraction) {
+    setState(() => _dragFraction = fraction.clamp(0.0, 1.0));
+  }
+
+  void _end() {
+    final fraction = _dragFraction;
+    if (fraction != null) widget.onScrubEnd(fraction);
+    setState(() => _dragFraction = null);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final currentLabel = Song.formatSeconds(
+      (_effectiveFraction * widget.durationSeconds).round(),
+    );
     return Column(
       children: [
         LayoutBuilder(
           builder: (context, constraints) {
             final width = constraints.maxWidth;
-            void seek(double dx) => onSeek((dx / width).clamp(0.0, 1.0));
+            double at(double dx) => (dx / width).clamp(0.0, 1.0);
             return GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTapDown: (d) => seek(d.localPosition.dx),
-              onHorizontalDragUpdate: (d) => seek(d.localPosition.dx),
+              onTapDown: (d) => _start(at(d.localPosition.dx)),
+              onTapUp: (_) => _end(),
+              onTapCancel: _end,
+              onHorizontalDragStart: (d) => _start(at(d.localPosition.dx)),
+              onHorizontalDragUpdate: (d) => _move(at(d.localPosition.dx)),
+              onHorizontalDragEnd: (_) => _end(),
+              onHorizontalDragCancel: _end,
               child: SizedBox(
                 height: 16,
                 child: Center(
@@ -312,7 +361,7 @@ class _ProgressBar extends StatelessWidget {
                         ),
                       ),
                       FractionallySizedBox(
-                        widthFactor: fraction,
+                        widthFactor: _effectiveFraction,
                         child: Container(
                           height: 6,
                           decoration: BoxDecoration(
@@ -322,7 +371,7 @@ class _ProgressBar extends StatelessWidget {
                         ),
                       ),
                       Positioned(
-                        left: (width * fraction) - 7,
+                        left: (width * _effectiveFraction) - 7,
                         top: -4,
                         child: Container(
                           width: 14,
@@ -353,7 +402,7 @@ class _ProgressBar extends StatelessWidget {
               ),
             ),
             Text(
-              durationLabel,
+              widget.durationLabel,
               style: AppTypography.bodyStyle(
                 size: 11.5,
                 color: context.colors.neutral600,

@@ -49,7 +49,35 @@ class AppShell extends StatelessWidget {
         body: Stack(
           children: [
             Positioned.fill(
-              child: SafeArea(bottom: false, child: _tab(activeTab)),
+              child: SafeArea(
+                bottom: false,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 320),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  layoutBuilder: (currentChild, previousChildren) => Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      ...previousChildren,
+                      ?currentChild,
+                    ],
+                  ),
+                  transitionBuilder: (child, animation) => FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0, 0.03),
+                        end: Offset.zero,
+                      ).animate(animation),
+                      child: child,
+                    ),
+                  ),
+                  child: KeyedSubtree(
+                    key: ValueKey(activeTab),
+                    child: _tab(activeTab),
+                  ),
+                ),
+              ),
             ),
             Positioned(
               left: 0,

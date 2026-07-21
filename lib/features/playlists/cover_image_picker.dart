@@ -15,7 +15,7 @@ abstract interface class CoverImagePicker {
 class FileSelectorCoverImagePicker implements CoverImagePicker {
   @override
   Future<String?> pickCover() async {
-    final result = await FilePicker.pickFiles(
+    final result = await FilePicker.platform.pickFiles(
       type: FileType.image,
       allowMultiple: false,
     );

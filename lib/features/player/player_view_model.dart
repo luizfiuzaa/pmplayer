@@ -45,6 +45,8 @@ class PlayerViewModel extends ChangeNotifier {
 
     _positionSub = _engine.positionStream.listen(_onPosition);
     _completedSub = _engine.onCompleted.listen((_) => _onCompleted());
+    _remoteSub = _engine.remoteActions.listen(_onRemoteAction);
+    _engine.setShuffleActive(_shuffle);
 
     if (_currentId != null && _progress > 0) {
       _ensureLoaded();
@@ -59,11 +61,15 @@ class PlayerViewModel extends ChangeNotifier {
   final Random _random;
   late final StreamSubscription<Duration> _positionSub;
   late final StreamSubscription<void> _completedSub;
+  late final StreamSubscription<PlayerRemoteAction> _remoteSub;
 
   String? _currentId;
   String? _loadedId;
   int _progress = 0;
+  Duration _position = Duration.zero;
   bool _playing = false;
+  bool _scrubbing = false;
+  bool _wasPlayingBeforeScrub = false;
   bool _shuffle = false;
   bool _repeat = false;
   late List<String> _base;
@@ -76,6 +82,10 @@ class PlayerViewModel extends ChangeNotifier {
   Song? get currentSong =>
       _currentId == null ? null : library.songByIdOrNull(_currentId!);
   int get progressSeconds => _progress;
+
+  /// Posição de reprodução com precisão de milissegundos (para sincronizar a
+  /// letra); [progressSeconds] continua em segundos para o resto da UI.
+  Duration get position => _position;
   bool get isPlaying => _playing;
   bool get shuffle => _shuffle;
   bool get repeat => _repeat;
@@ -111,6 +121,7 @@ class PlayerViewModel extends ChangeNotifier {
     if (label != null) _contextLabel = label;
     _loadedId = null;
     _ensureLoaded();
+    _engine.setShuffleActive(_shuffle);
     _engine.play();
     navigation.openNowPlaying();
     _saveState();
@@ -159,8 +170,26 @@ class PlayerViewModel extends ChangeNotifier {
   void toggleShuffle() {
     _shuffle = !_shuffle;
     _order = _shuffle ? _shuffled(_base, first: _currentId) : List.of(_base);
+    _engine.setShuffleActive(_shuffle);
     _saveState();
     notifyListeners();
+  }
+
+  /// Traduz um toque nos controles da notificação em comando de reprodução,
+  /// mantendo o [PlayerViewModel] como fonte única de verdade.
+  void _onRemoteAction(PlayerRemoteAction action) {
+    switch (action) {
+      case PlayerRemoteAction.play:
+        if (!_playing) togglePlay();
+      case PlayerRemoteAction.pause:
+        if (_playing) togglePlay();
+      case PlayerRemoteAction.next:
+        next();
+      case PlayerRemoteAction.previous:
+        prev();
+      case PlayerRemoteAction.shuffle:
+        toggleShuffle();
+    }
   }
 
   void toggleRepeat() {
@@ -173,9 +202,45 @@ class PlayerViewModel extends ChangeNotifier {
     final song = currentSong;
     if (song == null) return;
     _progress = (fraction.clamp(0.0, 1.0) * song.durationSeconds).round();
+    _position = Duration(seconds: _progress);
     _engine.seek(Duration(seconds: _progress));
     prefs?.setInt('player_progress', _progress);
     notifyListeners();
+  }
+
+  /// Posiciona a reprodução num instante exato (ex.: tocar em uma linha da
+  /// letra sincronizada). Limita entre zero e a duração da faixa.
+  void seekTo(Duration position) {
+    final song = currentSong;
+    if (song == null) return;
+    final max = Duration(seconds: song.durationSeconds);
+    final clamped = position < Duration.zero
+        ? Duration.zero
+        : (position > max ? max : position);
+    _position = clamped;
+    _progress = clamped.inSeconds;
+    _engine.seek(clamped);
+    prefs?.setInt('player_progress', _progress);
+    notifyListeners();
+  }
+
+  bool get isScrubbing => _scrubbing;
+
+  /// Entra no modo de arrastar o tempo: pausa o áudio (fluido, sem lutar com o
+  /// stream de posição) e lembra se estava tocando para retomar ao soltar.
+  void beginScrub() {
+    if (!hasCurrent || _scrubbing) return;
+    _scrubbing = true;
+    _wasPlayingBeforeScrub = _playing;
+    if (_playing) _engine.pause();
+  }
+
+  /// Sai do modo de arrastar: posiciona na fração final e só então retoma.
+  void endScrub(double fraction) {
+    if (!_scrubbing) return;
+    _scrubbing = false;
+    seekToFraction(fraction);
+    if (_wasPlayingBeforeScrub) _engine.play();
   }
 
   void playPlaylist(Playlist playlist, {bool shuffle = false}) {
@@ -202,15 +267,16 @@ class PlayerViewModel extends ChangeNotifier {
 
   // ── Interno ────────────────────────────────────────────────────────────────
   void _onPosition(Duration position) {
+    if (_scrubbing) return;
     final song = currentSong;
     if (song == null) return;
-    final seconds = position.inSeconds;
-    final clamped = seconds > song.durationSeconds
-        ? song.durationSeconds
-        : seconds;
-    if (clamped == _progress) return;
-    _progress = clamped;
-    prefs?.setInt('player_progress', _progress);
+    final max = Duration(seconds: song.durationSeconds);
+    _position = position > max ? max : position;
+    final seconds = _position.inSeconds;
+    if (seconds != _progress) {
+      _progress = seconds;
+      prefs?.setInt('player_progress', _progress);
+    }
     notifyListeners();
   }
 
@@ -261,6 +327,7 @@ class PlayerViewModel extends ChangeNotifier {
   void dispose() {
     _positionSub.cancel();
     _completedSub.cancel();
+    _remoteSub.cancel();
     _engine.dispose();
     super.dispose();
   }

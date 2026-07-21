@@ -14,10 +14,12 @@ import 'package:pmplayer/features/player/player_view_model.dart';
 class FakeAudioEngine implements AudioEngine {
   final _position = StreamController<Duration>.broadcast();
   final _completed = StreamController<void>.broadcast();
+  final _remote = StreamController<PlayerRemoteAction>.broadcast();
   String? loadedUri;
   bool playing = false;
   Duration? lastSeek;
   int loadCount = 0;
+  bool? shuffleActive;
 
   @override
   Future<Duration?> load(Song song) async {
@@ -37,10 +39,15 @@ class FakeAudioEngine implements AudioEngine {
   @override
   Stream<void> get onCompleted => _completed.stream;
   @override
+  Stream<PlayerRemoteAction> get remoteActions => _remote.stream;
+  @override
+  void setShuffleActive(bool value) => shuffleActive = value;
+  @override
   Future<void> dispose() async {}
 
   void emitPosition(int seconds) => _position.add(Duration(seconds: seconds));
   void emitCompleted() => _completed.add(null);
+  void emitRemote(PlayerRemoteAction action) => _remote.add(action);
 }
 
 /// Snapshot com faixas que têm arquivo (uri), preservando ids/playlists/favoritas.
@@ -201,7 +208,118 @@ void main() {
       h.player.play('s1'); // dur 214
       h.player.seekToFraction(0.5);
       expect(h.player.progressSeconds, 107);
+      expect(h.player.position, const Duration(seconds: 107));
       expect(h.engine.lastSeek, const Duration(seconds: 107));
+    });
+
+    test('seekTo posiciona o engine, progresso e position', () {
+      final h = Harness();
+      h.player.play('s1'); // dur 214
+      h.player.seekTo(const Duration(seconds: 31, milliseconds: 70));
+      expect(h.engine.lastSeek, const Duration(seconds: 31, milliseconds: 70));
+      expect(h.player.position, const Duration(seconds: 31, milliseconds: 70));
+      expect(h.player.progressSeconds, 31);
+    });
+
+    test('seekTo além da duração é limitado ao fim', () {
+      final h = Harness();
+      h.player.play('s1'); // dur 214
+      h.player.seekTo(const Duration(seconds: 999));
+      expect(h.player.progressSeconds, 214);
+    });
+
+    test('position expõe a posição vinda do engine', () async {
+      final h = Harness();
+      h.player.play('s1');
+      h.engine.emitPosition(42);
+      await Future<void>.delayed(Duration.zero);
+      expect(h.player.position, const Duration(seconds: 42));
+    });
+  });
+
+  group('scrub (arrastar o tempo)', () {
+    test('beginScrub pausa o áudio mas mantém a intenção de tocar', () {
+      final h = Harness();
+      h.player.play('s1');
+      expect(h.engine.playing, isTrue);
+      h.player.beginScrub();
+      expect(h.engine.playing, isFalse);
+      expect(h.player.isPlaying, isTrue);
+    });
+
+    test('endScrub posiciona o engine e retoma se estava tocando', () {
+      final h = Harness();
+      h.player.play('s1'); // dur 214
+      h.player.beginScrub();
+      h.player.endScrub(0.5);
+      expect(h.player.progressSeconds, 107);
+      expect(h.engine.lastSeek, const Duration(seconds: 107));
+      expect(h.engine.playing, isTrue);
+    });
+
+    test('endScrub não retoma se estava pausado', () {
+      final h = Harness();
+      h.player.play('s1');
+      h.player.togglePlay(); // pausa
+      h.player.beginScrub();
+      h.player.endScrub(0.25);
+      expect(h.player.progressSeconds, 54);
+      expect(h.engine.playing, isFalse);
+    });
+
+    test('eventos de posição são ignorados durante o scrub', () async {
+      final h = Harness();
+      h.player.play('s1');
+      h.player.beginScrub();
+      h.engine.emitPosition(99);
+      await Future<void>.delayed(Duration.zero);
+      expect(h.player.progressSeconds, 0);
+    });
+  });
+
+  group('ações remotas (notificação)', () {
+    test('play remoto retoma quando pausado', () async {
+      final h = Harness();
+      h.player.play('s1');
+      h.player.togglePlay(); // pausa
+      h.engine.emitRemote(PlayerRemoteAction.play);
+      await Future<void>.delayed(Duration.zero);
+      expect(h.player.isPlaying, isTrue);
+      expect(h.engine.playing, isTrue);
+    });
+
+    test('pause remoto pausa quando tocando', () async {
+      final h = Harness();
+      h.player.play('s1');
+      h.engine.emitRemote(PlayerRemoteAction.pause);
+      await Future<void>.delayed(Duration.zero);
+      expect(h.player.isPlaying, isFalse);
+      expect(h.engine.playing, isFalse);
+    });
+
+    test('next remoto avança a faixa', () async {
+      final h = Harness();
+      h.player.play('s1');
+      h.engine.emitRemote(PlayerRemoteAction.next);
+      await Future<void>.delayed(Duration.zero);
+      expect(h.player.currentId, 's2');
+    });
+
+    test('previous remoto volta a faixa', () async {
+      final h = Harness();
+      h.player.play('s5');
+      h.engine.emitRemote(PlayerRemoteAction.previous);
+      await Future<void>.delayed(Duration.zero);
+      expect(h.player.currentId, 's4');
+    });
+
+    test('shuffle remoto alterna e sincroniza o ícone', () async {
+      final h = Harness();
+      h.player.play('s1');
+      h.engine.emitRemote(PlayerRemoteAction.shuffle);
+      await Future<void>.delayed(Duration.zero);
+      expect(h.player.shuffle, isTrue);
+      expect(h.engine.shuffleActive, isTrue);
     });
   });
 

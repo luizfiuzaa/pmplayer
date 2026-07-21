@@ -8,18 +8,20 @@ environment:
 
 dependencies:
   audio_metadata_reader: ^1.6.0
+  audio_service: ^0.18.15
   drift: ^2.34.2
   drift_flutter: ^0.3.1
-  file_picker: ^11.0.2
+  file_picker: ^10.1.7
   flutter:
     sdk: flutter
   just_audio: ^0.10.6
-  just_audio_background: ^0.0.1-beta.17
+  palette_generator: ^0.3.3
   path: ^1.9.1
   path_provider: ^2.1.6
   permission_handler: ^12.0.3
   provider: ^6.1.2
   shared_preferences: ^2.5.5
+  sqlite3_flutter_libs: ^0.6.0+eol
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -48,13 +50,13 @@ flutter:
 flutter_launcher_icons:
   android: "ic_launcher"
   ios: true
-  image_path: "pmplayer-icon.png"
+  image_path: "assets/icons/favicon.png"
   web:
     generate: true
-    image_path: "pmplayer-icon.png"
+    image_path: "assets/icons/favicon.png"
   macos:
     generate: true
-    image_path: "pmplayer-icon.png"
+    image_path: "assets/icons/favicon.png"
   windows:
     generate: true
-    image_path: "pmplayer-icon.png"
+    image_path: "assets/icons/favicon.png"

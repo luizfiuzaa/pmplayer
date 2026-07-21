@@ -27,6 +27,27 @@ class LibraryStore extends ChangeNotifier {
 
   void _reindex() => _byId = {for (final s in _songs) s.id: s};
 
+  /// Filtra [songs] por título ou artista, ignorando maiúsculas e acentos.
+  /// Query vazia devolve a lista intacta. Função pura (fácil de testar).
+  static List<Song> matching(List<Song> songs, String query) {
+    final q = _fold(query);
+    if (q.isEmpty) return List.of(songs);
+    return songs
+        .where((s) => _fold(s.title).contains(q) || _fold(s.artist).contains(q))
+        .toList();
+  }
+
+  static String _fold(String value) {
+    const from = 'áàâãäéèêëíìîïóòôõöúùûüçñ';
+    const to = 'aaaaaeeeeiiiiooooouuuucn';
+    final buffer = StringBuffer();
+    for (final ch in value.toLowerCase().trim().split('')) {
+      final i = from.indexOf(ch);
+      buffer.write(i >= 0 ? to[i] : ch);
+    }
+    return buffer.toString();
+  }
+
   // ── Faixas ─────────────────────────────────────────────────────────────
   List<Song> get songs => List.unmodifiable(_songs);
   List<String> get allSongIds => _songs.map((s) => s.id).toList();
@@ -73,6 +94,24 @@ class LibraryStore extends ChangeNotifier {
     final playlist = Playlist(id: id, name: name, songIds: List.of(songIds));
     _playlists.add(playlist);
     _repository?.addPlaylist(playlist);
+    notifyListeners();
+  }
+
+  /// Se a faixa está na playlist.
+  bool playlistHasSong(String playlistId, String songId) {
+    final playlist = playlistById(playlistId);
+    return playlist != null && playlist.songIds.contains(songId);
+  }
+
+  /// Adiciona (no fim) ou remove a faixa da playlist, persiste e notifica.
+  void toggleSongInPlaylist(String playlistId, String songId) {
+    final index = _playlists.indexWhere((p) => p.id == playlistId);
+    if (index < 0) return;
+    final current = _playlists[index];
+    final songIds = List<String>.of(current.songIds);
+    if (!songIds.remove(songId)) songIds.add(songId);
+    _playlists[index] = current.copyWith(songIds: songIds);
+    _repository?.setPlaylistSongs(playlistId, songIds);
     notifyListeners();
   }
 

@@ -9,13 +9,12 @@ class SettingsSheet extends StatelessWidget {
   const SettingsSheet({super.key});
 
   static Future<void> show(BuildContext context) {
+    // Fundo transparente no modal; a superfície é pintada no build (via
+    // `context.colors`) para acompanhar a troca de tema feita dentro do sheet.
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: context.colors.bg,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (_) => const SettingsSheet(),
     );
   }
@@ -25,7 +24,11 @@ class SettingsSheet extends StatelessWidget {
     final settings = context.watch<SettingsStore>();
     final mode = settings.themeMode;
 
-    return Padding(
+    return Container(
+      decoration: BoxDecoration(
+        color: context.colors.bg,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+      ),
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 48),
       child: Column(
         mainAxisSize: MainAxisSize.min,

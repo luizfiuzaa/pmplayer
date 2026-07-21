@@ -12,6 +12,7 @@ class Song {
     this.palette,
     this.uri,
     this.coverPath,
+    this.lyrics,
   });
 
   final String id;
@@ -28,6 +29,13 @@ class Song {
   /// Caminho de um arquivo de imagem de capa (arte embutida extraída dos
   /// metadados). `null` = usa paleta/capa genérica.
   final String? coverPath;
+
+  /// Letra (não sincronizada) lida dos metadados embutidos. `null`/vazio = sem
+  /// letra disponível.
+  final String? lyrics;
+
+  /// `true` quando há letra disponível para exibir.
+  bool get hasLyrics => lyrics != null && lyrics!.trim().isNotEmpty;
 
   /// `true` quando a faixa não tem paleta e usa a capa genérica.
   bool get isGeneric => palette == null;

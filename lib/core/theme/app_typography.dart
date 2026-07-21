@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'app_colors.dart';
-
 /// Tipografia do design system: Caprasimo (títulos) sobre Figtree (corpo).
 abstract final class AppTypography {
   static const String heading = 'Caprasimo';
@@ -18,7 +16,7 @@ abstract final class AppTypography {
     fontSize: size,
     height: height,
     letterSpacing: -0.015 * size,
-    color: color ?? AppColors.light.text,
+    color: color,
   );
 
   /// Estilo de corpo (Figtree) com peso configurável.
@@ -34,6 +32,6 @@ abstract final class AppTypography {
     fontSize: size,
     height: height,
     letterSpacing: letterSpacing,
-    color: color ?? AppColors.light.text,
+    color: color,
   );
 }

@@ -1,7 +1,19 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart';
-import 'package:drift_flutter/drift_flutter.dart';
+import 'package:drift/native.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
 part 'app_database.g.dart';
+
+QueryExecutor _openConnection() {
+  return LazyDatabase(() async {
+    final dbFolder = await getApplicationDocumentsDirectory();
+    final file = File(p.join(dbFolder.path, 'pmplayer.sqlite'));
+    return NativeDatabase.createInBackground(file);
+  });
+}
 
 /// Faixas importadas. `position` preserva a ordem de inserção.
 @DataClassName('SongRow')
@@ -17,6 +29,9 @@ class Songs extends Table {
 
   /// Caminho da imagem de capa (arte embutida extraída dos metadados).
   TextColumn get coverPath => text().nullable()();
+
+  /// Letra (não sincronizada) lida dos metadados embutidos.
+  TextColumn get lyrics => text().nullable()();
   IntColumn get position => integer()();
 
   @override
@@ -51,13 +66,13 @@ class FavoriteSongs extends Table {
 
 @DriftDatabase(tables: [Songs, Playlists, FavoriteSongs])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(driftDatabase(name: 'pmplayer'));
+  AppDatabase() : super(_openConnection());
 
   /// Construtor para testes (ex.: banco em memória).
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -65,6 +80,9 @@ class AppDatabase extends _$AppDatabase {
       if (from < 2) {
         await m.addColumn(songs, songs.coverPath);
         await m.addColumn(playlists, playlists.coverPath);
+      }
+      if (from < 3) {
+        await m.addColumn(songs, songs.lyrics);
       }
     },
   );

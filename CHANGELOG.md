@@ -4,6 +4,118 @@ Todas as alterações relevantes do PMPlayer são registradas aqui (exigência d
 
 ## [Não lançado]
 
+### Importação — por lotes (chunks), sem travar
+- A importação agora emite as faixas em lotes conforme são lidas (`MusicImporter.importChunked` — `Stream<List<Song>>`, ~8 por lote), em vez de ler tudo e só então mostrar. A lista cresce progressivamente e o app cede o controle ao event loop entre lotes (`Future.delayed(Duration.zero)`), evitando a sensação de travamento. Durante o carregamento, as faixas já lidas aparecem acima do skeleton.
+
+### Mini-player — contraste do texto sobre fundo escuro
+- Quando a cor da capa (fundo do mini-player) é escura, o texto e os ícones passam para uma cor clara de contraste (e vice-versa), calculado pela luminância da cor base da barra. `HeartButton` ganhou `unselectedColor` para o mesmo fim.
+
+### Título — letreiro (marquee) quando longo
+- Títulos de música que não cabem na largura passam a rolar em looping (efeito letreiro) enquanto a faixa está tocando; se couberem — ou a faixa estiver pausada — ficam estáticos com reticências. Aplicado no player (título grande) e no mini-player. Novo `lib/core/widgets/marquee_text.dart` (`MarqueeText`), medindo o texto com `TextPainter` e rolando com duas cópias + `ClipRect`.
+
+### Letra — transição ao avançar
+- A troca de linha ativa da letra agora é animada (`AnimatedDefaultTextStyle`, 320ms, `easeOutCubic`): a linha atual cresce/realça e as demais recuam suavemente, em vez de mudar de estilo instantaneamente. O auto-scroll suave já existente complementa o efeito.
+
+### Biblioteca — barra de busca fixa (sticky)
+- Ao rolar a lista de músicas, a barra de busca fica fixa no topo (`CustomScrollView` + `SliverPersistentHeader` pinado, com fundo opaco para a lista rolar por baixo); o título "Ouvir agora" rola normalmente.
+
+### Letra — tocar em uma linha pula para o momento
+- Na letra expandida (LRC sincronizada), tocar em uma linha pula a reprodução para o instante dela. Novo `PlayerViewModel.seekTo(Duration)` (limita entre zero e a duração). Linhas sem timestamp não são clicáveis.
+
+### Cor dominante da capa — fundo do player e mini-player
+- No import, a cor dominante da arte embutida é extraída (`palette_generator`) e guardada em `Song.palette` (par dominante + variação escura, persistido no drift). Antes, faixas com capa em imagem ficavam sem paleta e caíam no verde padrão.
+- O fundo esverdeado do player agora usa a cor dominante da capa da faixa tocando (o gradiente já derivava de `palette.first`), e o mini-player (barra acima da navigation bar) usa o mesmo par de cores. Faixas sem arte mantêm o sólido do design.
+
+### Player — girar a capa também para a esquerda
+- O gesto de virar a capa (para revelar a letra) passou a seguir o sentido do arrasto: arrastar para a esquerda gira para a esquerda, para a direita gira para a direita (antes a rotação era sempre no mesmo sentido). Toque continua virando.
+
+### Letra — sincronia precisa (ms)
+- A letra sincronizada (LRC) deixou de usar a posição em segundos inteiros (até ~1s de defasagem) e passou a acompanhar a posição real em milissegundos. `PlayerViewModel` expõe `position` (Duration), atualizada a cada evento do engine; a letra expandida usa essa posição para destacar/rolar até a linha certa.
+
+### Importação — loading com skeleton
+- Ao adicionar músicas, a Biblioteca mostra um estado de carregamento com skeleton (linhas placeholder no formato de faixa, com shimmer) enquanto o importador lê os arquivos, em vez de ficar sem feedback. Novo `lib/core/widgets/skeleton.dart` (`SkeletonLoader`, `SkeletonBox`, `TrackTileSkeleton`, `TrackListSkeleton`).
+- Testes: `position` do `PlayerViewModel`; e widget que verifica o skeleton durante a importação (some ao concluir, faixas aparecem).
+
+### Refatoração — `main.dart` enxuto
+- `main.dart` agora contém só o bootstrap (init do `audio_service`, engine, repositório drift, prefs e `runApp`). O widget raiz `PmPlayerApp` (injeção de dependências, `MaterialApp` e modo imersivo) foi movido para `lib/app_widget.dart` (que antes era um stub órfão). O import de teste passou a apontar para `app_widget.dart`.
+
+### Modo imersivo — barras do sistema escondidas
+- As barras do sistema (status e navegação) somem ao abrir o app e só reaparecem ao arrastar da borda, voltando a sumir sozinhas (`SystemUiMode.immersiveSticky`). Barras deixadas transparentes (edge-to-edge) para não sobreporem o app quando surgem; o conteúdo respeita as bordas via `SafeArea`.
+- `PmPlayerApp` virou `StatefulWidget` com `WidgetsBindingObserver` para reaplicar o modo imersivo ao voltar do background (`resumed`) — senão as barras ficariam visíveis após o teclado/troca de app.
+
+### Mini-player — cor da capa
+- A barra do mini-player agora usa a cor da capa da faixa: aplica o mesmo gradiente da arte (`LinearGradient` topLeft→bottomRight sobre a paleta crua, mesma intensidade da `CoverArtwork`). Faixas sem paleta (capa genérica/imagem) mantêm o sólido `accent2_800` do design. Trocado `Material`+`Container` por `Ink` para o gradiente preservando o ripple do toque.
+
+### Ícone do app / favicon
+- Ícone atualizado para `assets/icons/favicon.png` (1254×1254). `flutter_launcher_icons` reconfigurado (`image_path`) e regenerado para Android (mipmaps), iOS (AppIcon), Web (favicon + icons), Windows e macOS.
+
+### Player — capa que gira para mostrar a letra
+- A arte do player agora "vira" (toque ou arrasto horizontal, rotação 3D no eixo Y) para revelar a letra da faixa no verso. Girar de novo volta para a capa; ao trocar de faixa a arte reseta na capa.
+- No verso, um botão no canto superior direito expande a letra em tela cheia rolável (para acompanhar); um (X) fecha e volta ao quadrado.
+- Letra lida dos metadados embutidos: `AudioMetadata.lyrics` (USLT/mp4/ape/vorbis). Sem letra → "Sem letra disponível" e o botão de expandir some.
+- Dados: `Song.lyrics` + `hasLyrics`; nova coluna `lyrics` na tabela `songs` (schema drift v2 → v3 com migração `addColumn`); importer passa a ler a letra. Uma faixa de exemplo ganhou letra para demonstração.
+- Novo widget `lib/features/player/lyrics_artwork.dart` (`LyricsArtwork` + `LyricsFullView`).
+- Testes: parsing da letra no importer, e widget cobrindo virar → expandir → (X) e o estado sem letra. Build de APK debug verificado (migração ok).
+
+### Letra — tratamento do formato LRC (sincronizado)
+- Novo parser `Lyrics.parse` (`lib/core/models/lyrics.dart`): remove tags de metadados (`[ti:]`, `[ar:]`, `[by:]`, `[offset:]`…), extrai as linhas com timestamp `[mm:ss.xx]`, junta linhas quebradas à linha do timestamp anterior e separa timestamps que aparecem no meio do texto. Suporta `offset` e também texto simples (sem timestamps).
+- No player: a face de letra mostra o texto já limpo (sem tags). No modo expandido, quando a letra é LRC, a linha atual é destacada e a rolagem acompanha a reprodução automaticamente (`activeIndex` pela posição do player); letra simples continua rolável.
+- A faixa de exemplo passou a usar letra em LRC para demonstrar a sincronia.
+- Testes: `test/core/models/lyrics_test.dart` cobre o LRC colado (metadados, tempos, linhas quebradas, timestamp no meio, `activeIndex`, offset e texto simples/vazio).
+
+### Player — adicionar/remover a faixa de playlists
+- O botão de menu (três pontos) no topo do player agora abre um sheet "Adicionar a playlist" com um checkbox por playlist; tocar em uma linha adiciona (no fim) ou remove a faixa atual daquela playlist, persistindo a mudança.
+- Novo: `LibraryStore.toggleSongInPlaylist` / `playlistHasSong`, `LibraryRepository.setPlaylistSongs` (+ impl drift que reescreve `songIdsJson`). Novo widget `lib/features/playlists/add_to_playlist_sheet.dart` (superfície reativa ao tema).
+- Testes: unidade em `library_store_test.dart` (toggle add/remove/persistência/playlist inexistente) e widget em `app_smoke_test.dart` (menu do player desmarca a faixa de uma playlist).
+
+### Biblioteca — busca funcional
+- O campo de busca (antes decorativo) agora filtra as faixas por título ou artista, ignorando maiúsculas/minúsculas e acentos (`LibraryStore.matching`, função pura testada). Query vazia mostra a lista normal; com texto, mostra "Resultados" + contagem, botão de limpar e estado vazio "Nenhuma música encontrada".
+- Testes: unidade em `library_store_test.dart` (caixa/acento/sem-match) e widget em `app_smoke_test.dart` (digitar filtra a lista).
+
+### Criar playlist — botão acima do teclado
+- No sheet "Nova playlist" o botão **Criar playlist** virou rodapé fixo, sempre acima do teclado ao focar o campo de nome (padding = `MediaQuery.viewInsets.bottom`). A lista de músicas rola em um `Flexible`/`SingleChildScrollView` e a altura máxima do sheet desconta o teclado.
+
+### Correção de Tema — inconsistência ao trocar a aparência
+- Corrigida a inconsistência visual ao alternar claro/escuro pelo sheet de Configurações: o `showModalBottomSheet` capturava `backgroundColor: context.colors.bg` no momento da abertura, então o fundo do sheet ficava com a cor do tema antigo enquanto o conteúdo (texto/opções) já atualizava.
+- Agora o modal usa fundo transparente e a superfície é pintada no `build` via `context.colors.bg` (com os cantos arredondados do topo), reagindo à troca de tema em tempo real.
+- Teste: `test/features/settings/settings_sheet_theme_test.dart` verifica que a superfície do sheet acompanha claro → escuro → claro.
+
+### Navegação — transição suave entre páginas
+- A área de conteúdo das abas (Biblioteca / Playlists / Favoritas / detalhe) agora troca com uma transição suave (fade + leve deslize para cima, 320ms, `easeOutCubic`) via `AnimatedSwitcher` em `app_shell.dart`, em vez de trocar instantaneamente. `layoutBuilder` com `StackFit.expand` preserva o preenchimento total das páginas durante a troca.
+
+### Player — arrasto de tempo fluido
+- O gesto de arrastar o tempo agora é fluido e performático: o polegar segue o dedo via estado local do widget (`_ProgressBar` virou `StatefulWidget`), sem reconstruir a tela inteira nem chamar o engine a cada frame; o rótulo de tempo atualiza ao vivo durante o arrasto.
+- Ao entrar no modo de arrastar o áudio pausa (`PlayerViewModel.beginScrub`) e só retoma ao soltar, posicionando na fração final (`endScrub`). Eventos de posição do engine são ignorados durante o scrub para não brigar com o polegar.
+
+### Notificação de mídia — migração para `audio_service`
+- Substituído `just_audio_background` por `audio_service` (+ `PmAudioHandler`) para permitir controles customizados na notificação.
+- Botões da notificação agora são: **shuffle · faixa anterior · play/pause · próxima faixa** (o botão de parar/stop foi removido).
+- O handler espelha o estado real do `AudioPlayer` e traduz os toques em `PlayerRemoteAction`, mantendo o `PlayerViewModel` como fonte única de verdade (sem laços). O ícone de shuffle reflete o estado ativo (`ic_shuffle` / `ic_shuffle_on`).
+- Adicionados drawables `android/app/src/main/res/drawable/ic_shuffle*.xml`; o `AndroidManifest.xml` já estava correto (o `just_audio_background` usava o mesmo `com.ryanheise.audioservice`).
+- Novos arquivos: `lib/core/playback/pm_audio_handler.dart`, `lib/core/playback/audio_service_engine.dart` (substitui `just_audio_engine.dart`). `AudioEngine` ganhou `remoteActions` e `setShuffleActive`.
+- Testes: cobertura em `player_view_model_test.dart` para scrub e para as ações remotas (play/pause/next/previous/shuffle). Build de APK debug verificado.
+
+### Correção de Tema — texto preto no modo escuro
+- Corrigido texto renderizado em preto sobre superfícies escuras no modo escuro (ilegível).
+- Causa raiz: `AppTypography.headingStyle`/`bodyStyle` usavam `color: color ?? AppColors.light.text` como fallback estático, fixando a cor do texto claro (`0xFF201E1D`, quase preto) independentemente do tema ativo.
+- Solução: removido o fallback estático; quando `color` é nulo o texto herda a cor do `TextTheme` do tema ativo (definida em `AppTheme.build` como `colors.text`), resolvendo corretamente para claro no escuro e escuro no claro.
+- Teste: adicionado `test/core/theme/app_typography_theme_test.dart` cobrindo herança de cor em ambos os modos e prioridade da cor explícita.
+
+### Correção de Runtime Android — sqlite3 native assets
+- Resolvido o erro em runtime `Invalid argument(s): Couldn't resolve native function 'sqlite3_initialize' ... No available native assets ... undefined symbol: sqlite3_initialize` ao debugar no Android.
+- Causa raiz: `sqlite3` 3.x (via `drift`) migrou o empacotamento da lib nativa para *build hooks* / native assets. O hooks_runner falhava porque o Flutter SDK reside em um caminho com espaço (`C:\Users\Luiz Fiuza\flutter`), quebrando a invocação `dart compile kernel` do hook (`'C:\Users\Luiz' não é reconhecido...`).
+- Solução: habilitado `flutter config --enable-native-assets` e criada uma junction sem espaço para o SDK (`C:\pmflutter` -> `C:\Users\Luiz Fiuza\flutter`); `android/local.properties` passou a apontar `flutter.sdk=C:\pmflutter`. Com isso o hook compila e a `libsqlite3.so` é empacotada no APK (arm64-v8a, armeabi-v7a, x86_64).
+- Observação: `drift_flutter` e `sqlite3_flutter_libs` (`0.6.0+eol`, stub sem função) permanecem apenas como dependências transitivas; a lib nativa agora vem dos native assets do pacote `sqlite3`.
+
+### Correção de Build Android (APK)
+- Removido o arquivo estático e obsoleto `android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java` que causava erro de compilação Java `cannot find symbol FilePickerPlugin` durante `flutter build apk --release`.
+- Adicionada a aplicação do plugin Kotlin Android `id("org.jetbrains.kotlin.android")` no bloco `plugins` de `android/app/build.gradle.kts`.
+- Reorganizada a estrutura de diretórios do `MainActivity.kt` para `android/app/src/main/kotlin/com/example/pmplayer/MainActivity.kt` alinhando com o pacote `com.example.pmplayer`.
+- Substituída a inicialização via `driftDatabase` por `NativeDatabase.createInBackground` com `LazyDatabase` em `lib/core/data/database/app_database.dart`, eliminando o erro de FFI `undefined symbol: sqlite3_temp_directory` no Android.
+
+### Limpeza de Código
+- Removidos scripts e arquivos utilitários temporários de refatoração de tema (`replace_colors.dart`, `generate_colors2.dart`, `fix_remaining.dart`, `fix_errors.dart`, `fix_const_analyze.dart`, `colors_ext.txt`).
+
 ### Metadados ID3 e Capas
 - Leitura de metadados reais (título, artista, duração e capa embutida) de arquivos locais na importação usando `audio_metadata_reader`.
 - Novo recurso visual: faixas agora mostram a capa do arquivo (quando disponível), e playlists ganharam suporte para fotos de capa customizáveis (usando `file_selector` e salvas no disco via `path_provider`).

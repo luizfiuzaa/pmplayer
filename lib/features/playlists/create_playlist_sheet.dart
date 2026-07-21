@@ -84,7 +84,11 @@ class _SheetBody extends StatelessWidget {
     final vm = context.watch<CreatePlaylistViewModel>();
     final library = context.read<LibraryStore>();
     final songs = library.songs;
-    final maxHeight = MediaQuery.sizeOf(context).height * 0.88;
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
+    // Reserva espaço pro teclado no cálculo da altura máxima, senão o sheet
+    // encostaria atrás do teclado.
+    final maxHeight =
+        (MediaQuery.sizeOf(context).height - keyboard) * 0.88;
 
     return Container(
       constraints: BoxConstraints(maxHeight: maxHeight),
@@ -95,59 +99,70 @@ class _SheetBody extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 14, 24, 30),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Container(
-                  width: 44,
-                  height: 5,
-                  margin: const EdgeInsets.only(bottom: 18, top: 2),
-                  decoration: BoxDecoration(
-                    color: context.colors.neutral400,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 44,
+                height: 5,
+                margin: const EdgeInsets.only(bottom: 18, top: 14),
+                decoration: BoxDecoration(
+                  color: context.colors.neutral400,
+                  borderRadius: BorderRadius.circular(999),
                 ),
               ),
-              Text(
-                'Nova playlist',
-                style: AppTypography.headingStyle(size: 26),
-              ),
-              SizedBox(height: 16),
-              Text(
-                'Nome da playlist',
-                style: AppTypography.bodyStyle(
-                  size: 12,
-                  color: context.colors.alpha(context.colors.text, 0.7),
+            ),
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Nova playlist',
+                      style: AppTypography.headingStyle(size: 26),
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'Nome da playlist',
+                      style: AppTypography.bodyStyle(
+                        size: 12,
+                        color: context.colors.alpha(context.colors.text, 0.7),
+                      ),
+                    ),
+                    SizedBox(height: 5),
+                    _NameField(controller: nameController, onChanged: vm.setName),
+                    SizedBox(height: 20),
+                    Text(
+                      'ADICIONAR MÚSICAS · ${vm.pickCount} SELECIONADAS',
+                      style: AppTypography.bodyStyle(
+                        size: 12,
+                        weight: FontWeight.w700,
+                        height: 1.2,
+                        letterSpacing: 1.2,
+                        color: context.colors.neutral600,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    for (final song in songs)
+                      _PickRow(
+                        song: song,
+                        picked: vm.isPicked(song.id),
+                        onToggle: () => vm.toggle(song.id),
+                      ),
+                  ],
                 ),
               ),
-              SizedBox(height: 5),
-              _NameField(controller: nameController, onChanged: vm.setName),
-              SizedBox(height: 20),
-              Text(
-                'ADICIONAR MÚSICAS · ${vm.pickCount} SELECIONADAS',
-                style: AppTypography.bodyStyle(
-                  size: 12,
-                  weight: FontWeight.w700,
-                  height: 1.2,
-                  letterSpacing: 1.2,
-                  color: context.colors.neutral600,
-                ),
-              ),
-              SizedBox(height: 10),
-              for (final song in songs)
-                _PickRow(
-                  song: song,
-                  picked: vm.isPicked(song.id),
-                  onToggle: () => vm.toggle(song.id),
-                ),
-              SizedBox(height: 22),
-              _CreateButton(enabled: vm.canCreate, onPressed: vm.submit),
-            ],
-          ),
+            ),
+            // Botão fixo, sempre acima do teclado quando o nome está em foco.
+            Padding(
+              padding: EdgeInsets.fromLTRB(24, 12, 24, 20 + keyboard),
+              child: _CreateButton(enabled: vm.canCreate, onPressed: vm.submit),
+            ),
+          ],
         ),
       ),
     );

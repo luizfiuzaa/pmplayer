@@ -17,6 +17,21 @@ class SampleMusicRepository implements MusicRepository {
       artist: 'Luíza Sol',
       durationSeconds: 214,
       palette: [AppColors.light.accent2_400, AppColors.light.accent2_700],
+      lyrics:
+          '[ti:Maré Cheia]\n'
+          '[ar:Luíza Sol]\n'
+          '[00:05.00]A maré subiu devagar\n'
+          '[00:09.00]levou meu nome pro mar\n'
+          '[00:13.00]e trouxe de volta a calma\n'
+          '[00:17.00]que eu tinha esquecido de guardar\n'
+          '[00:23.00]Deixa a água me levar\n'
+          '[00:27.00]deixa o tempo respirar\n'
+          '[00:31.00]que hoje eu não quero pressa\n'
+          '[00:35.00]só o balanço de estar\n'
+          '[00:41.00]Maré cheia, coração aberto\n'
+          '[00:45.00]o mundo inteiro cabe aqui perto\n'
+          '[00:49.00]entre a espuma e o sal\n'
+          '[00:53.00]tudo fica mais real',
     ),
     Song(
       id: 's2',

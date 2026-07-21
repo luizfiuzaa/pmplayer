@@ -52,6 +52,7 @@ class DriftLibraryRepository implements LibraryRepository {
             uri: Value(song.uri),
             paletteJson: Value(_encodePalette(song.palette)),
             coverPath: Value(song.coverPath),
+            lyrics: Value(song.lyrics),
             position: base + i,
           ),
           mode: InsertMode.insertOrReplace,
@@ -102,6 +103,12 @@ class DriftLibraryRepository implements LibraryRepository {
         .write(PlaylistsCompanion(coverPath: Value(coverPath)));
   }
 
+  @override
+  Future<void> setPlaylistSongs(String playlistId, List<String> songIds) async {
+    await (_db.update(_db.playlists)..where((t) => t.id.equals(playlistId)))
+        .write(PlaylistsCompanion(songIdsJson: Value(jsonEncode(songIds))));
+  }
+
   // ── Mapeamento linha ⇄ modelo ────────────────────────────────────────────
   Song _toSong(SongRow row) => Song(
     id: row.id,
@@ -111,6 +118,7 @@ class DriftLibraryRepository implements LibraryRepository {
     uri: row.uri,
     palette: _decodePalette(row.paletteJson),
     coverPath: row.coverPath,
+    lyrics: row.lyrics,
   );
 
   Playlist _toPlaylist(PlaylistRow row) => Playlist(
