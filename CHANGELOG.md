@@ -4,6 +4,11 @@ Todas as alterações relevantes do PMPlayer são registradas aqui (exigência d
 
 ## [Não lançado]
 
+## [v0.1.0] - 2026-07-21
+
+### Documentação — README.md completo do projeto
+- Criado o arquivo [README.md](/pmplayer/README.md) detalhando a visão geral do projeto, destaques de UX/UI, arquitetura MVVM Feature-Wise, engenharia de performance com Isolates, instruções de execução e suíte de testes.
+
 ### Mini-player — troca de faixa por gesto de arrastar (swipe left / right)
 - Adicionado suporte a gestos horizontais em [MiniPlayer](pmplayer/lib/features/player/mini_player.dart#L56-L70): arrastar para a esquerda reproduz a próxima faixa (`player.next()`) e arrastar para a direita reproduz a faixa anterior (`player.prev()`).
 
